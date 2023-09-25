@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Ordering</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Restaurant Name</h1>
+        <div class="admin-login">
+            <button onclick="showLogin()">Admin Login</button>
+            <div id="login-form" class="hidden">
+                <input type="text" id="username" placeholder="Username">
+                <input type="password" id="password" placeholder="Password">
+                <button onclick="login()">Login</button>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="order-section">
+            <h2>Start Ordering</h2>
+            <input type="text" id="table-number" placeholder="Enter Table Number">
+            <button onclick="startOrder()">Order</button>
+        </div>
+    </main>
+    <script src="index.js"></script>
+</body>
+</html>
