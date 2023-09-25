@@ -11,13 +11,27 @@ function login() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
-    // For demonstration purposes, we'll use hardcoded credentials.
-    if (username === 'admin' && password === 'password123') {
-        alert('Logged in successfully!');
-        document.getElementById('login-form').style.display = 'none';
-    } else {
-        alert('Invalid credentials!');
-    }
+    // Send a POST request to the backend
+    fetch('/admin/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === 'Logged in successfully!') {
+            alert('Logged in successfully!');
+            document.getElementById('login-form').style.display = 'none';
+        } else {
+            alert('Invalid credentials!');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
 }
 
 function startOrder() {
