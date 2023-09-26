@@ -44,7 +44,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 print("Stored Password Hash:", stored_password[0])
                 print("Entered Password Hash:", password)
 
-                if stored_password[0] and password:
+                if stored_password[0] == password:
                     print("Password comparison result: Matched")
                     # If passwords match, send a successful response
                     self.send_response(200)
