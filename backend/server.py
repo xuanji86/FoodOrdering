@@ -3,76 +3,161 @@ import socketserver
 import json
 import mysql.connector
 from urllib.parse import parse_qs
-from werkzeug.security import check_password_hash, generate_password_hash
-from werkzeug.security import generate_password_hash, check_password_hash
+import threading
+import sys
+import uuid
 
 
 PORT = 8080
+SESSION_STORE = {}
+
+# Database connection function
+def get_db_connection():
+    return mysql.connector.connect(
+        host="csce606.cs43a7mocfyt.us-west-1.rds.amazonaws.com",
+        port=3306,
+        user="root",
+        password="xuanji1998",
+        database="FoodOrder"
+    )
 
 class MyHandler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        super().end_headers()
 
     def do_POST(self):
-        if self.path == '/admin/login':
-            # Get the length of the POST data and read it
-            length = int(self.headers.get('content-length'))
-            post_data = self.rfile.read(length)
-            data = parse_qs(post_data.decode('utf-8'))
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-            # Extract username and password from the POST data
-            username = data.get('username', [None])[0]
-            password = data.get('password', [None])[0]
+        try:
+            if self.path == '/admin/login':
+                length = int(self.headers.get('content-length'))
+                post_data = self.rfile.read(length)
+                data = parse_qs(post_data.decode('utf-8'))
 
-            # Print received username and password for debugging
-            print("Received username:", username)
-            print("Received password:", password)
+                username = data.get('username', [None])[0]
+                password = data.get('password', [None])[0]
 
-            try:
-                # Connect to the MySQL database
-                conn = mysql.connector.connect(
-                    host="csce606.cs43a7mocfyt.us-west-1.rds.amazonaws.com",
-                    port=3306,
-                    user="root",
-                    password="xuanji1998",
-                    database="FoodOrder"
-                )
-
-                cursor = conn.cursor()
-
-                # Execute a SQL query to retrieve the stored password hash
-                cursor.execute("SELECT Password FROM FoodOrder.Manager WHERE UserName=%s", (username,))
+                cursor.execute("SELECT Password FROM Manager WHERE UserName=%s", (username,))
                 stored_password = cursor.fetchone()
-                print("Stored Password Hash:", stored_password[0])
-                print("Entered Password Hash:", password)
-
-                if stored_password[0] == password:
-                    print("Password comparison result: Matched")
-                    # If passwords match, send a successful response
+                if password == stored_password[0]:
+                    session_id = str(uuid.uuid4())
+                    SESSION_STORE[session_id] = username
+                    
                     self.send_response(200)
                     self.send_header('Content-type', 'application/json')
+                    self.send_header('Set-Cookie', f'session_id={session_id}; HttpOnly')
                     self.end_headers()
                     self.wfile.write(json.dumps({"message": "Logged in successfully!"}).encode())
                 else:
-                    # If passwords don't match, send a 401 Unauthorized response
-                    print("Password comparison result: Not matched")
                     self.send_response(401)
                     self.send_header('Content-type', 'application/json')
                     self.end_headers()
                     self.wfile.write(json.dumps({"message": "Invalid credentials!"}).encode())
 
-                cursor.close()
-                conn.close()
+            elif self.path == '/check-table':
+                length = int(self.headers.get('content-length'))
+                post_data = self.rfile.read(length)
+                data = json.loads(post_data.decode('utf-8'))
+
+                table_id = data.get('tableID')
+
+                cursor.execute("SELECT * FROM Table_ WHERE TableID=%s", (table_id,))
+                table = cursor.fetchone()
+
+                if table:
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"exists": True}).encode())
+                else:
+                    self.send_response(404)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"exists": False}).encode())
+
+            else:
+                self.send_response(404)
+                self.end_headers()
+
+        except mysql.connector.Error as err:
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"message": f"Database error: {str(err)}"}).encode())
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def do_GET(self):
+        if self.path == '/get-menu':
+            conn = get_db_connection()
+            cursor = conn.cursor(dictionary=True)
+
+            try:
+                cursor.execute("SELECT * FROM MENU")
+                menu = cursor.fetchall()
+
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps(menu).encode())
+
             except mysql.connector.Error as err:
-                # Handle database errors and send a 500 Internal Server Error response
                 self.send_response(500)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"message": f"Database error: {str(err)}"}).encode())
+
+            finally:
+                cursor.close()
+                conn.close()
+        if self.path == '/some-protected-endpoint':
+        # Get the session ID from the cookie
+            cookie_header = self.headers.get('Cookie')
+            if not cookie_header or 'session_id' not in cookie_header:
+                self.send_response(401)
+                self.end_headers()
+                return
+
+            session_id = cookie_header.split('=')[1]
+            if session_id not in SESSION_STORE:
+                self.send_response(401)
+                self.end_headers()
+                return
+
         else:
-            # If the request is not to /admin/login, send a 404 Not Found response
             self.send_response(404)
             self.end_headers()
+            
+    def do_OPTIONS(self):
+        self.send_response(200, "ok")
+        self.end_headers()
 
-# Create a TCP server on the specified port
-with socketserver.TCPServer(("", PORT), MyHandler) as httpd:
-    print("serving at port", PORT)
-    httpd.serve_forever()
+
+httpd = socketserver.TCPServer(("", PORT), MyHandler)
+is_serving = True
+
+def serve():
+    while is_serving:
+        httpd.handle_request()
+
+server_thread = threading.Thread(target=serve)
+server_thread.start()
+
+print(f"Serving at port {PORT}. Press Ctrl+C to stop.")
+
+try:
+    server_thread.join()
+except KeyboardInterrupt:
+    print("\nShutting down server...")
+    is_serving = False
+    httpd.server_close()
+    sys.exit(0)
+
+
+

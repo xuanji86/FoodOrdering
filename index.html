@@ -10,7 +10,12 @@
     <header>
         <h1>Restaurant Name</h1>
         <div class="admin-login">
-            <button onclick="showLogin()">Admin Login</button>
+            <div class="admin-dropdown">
+                <button id="admin-button" onclick="toggleDropdown()">Admin Login</button>
+                <div id="dropdown-content" class="dropdown-content">
+                    <button onclick="logout()">Logout</button>
+                </div>
+            </div>            
             <div id="login-form" class="hidden">
                 <input type="text" id="username" placeholder="Username">
                 <input type="password" id="password" placeholder="Password">
@@ -24,6 +29,7 @@
             <input type="text" id="table-number" placeholder="Enter Table Number">
             <button onclick="startOrder()">Order</button>
         </div>
+        <div id="menu"></div>
     </main>
     <script src="index.js"></script>
 </body>
