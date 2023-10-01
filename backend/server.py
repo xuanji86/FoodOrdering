@@ -81,6 +81,8 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_header('Content-type', 'application/json')
                     self.end_headers()
                     self.wfile.write(json.dumps({"isEmpty": is_empty}).encode())
+                    cursor.execute('UPDATE FoodOrder.Table_ SET IsEmpty = 1 WHERE TableID = %s', (table_id,))
+                    conn.commit()
                 else:
                     self.send_response(404)
                     self.send_header('Content-type', 'application/json')
