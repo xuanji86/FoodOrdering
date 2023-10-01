@@ -12,9 +12,10 @@ function startOrder() {
         })
             .then(response => response.json())
             .then(data => {
-                if (data.hasOwnProperty("is_empty")) {
-                    if (data.exists) {
+                if (data.hasOwnProperty("isEmpty")) {
+                    if (data.isEmpty) {
                         // If table exists and is empty, show the menu and ordering options
+                        alert("welcom!")
                         showMenu();
                     } else {
                         alert('Table is already occupied.');
