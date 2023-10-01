@@ -64,24 +64,33 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 data = json.loads(post_data.decode('utf-8'))
 
                 table_id = data.get('tableID')
+                print(f"Given table_id: {table_id}")
 
-                cursor.execute("SELECT * FROM Table_ WHERE TableID=%s", (table_id,))
+                cursor.execute("SELECT IsEmpty FROM Table_ WHERE TableID=%s", (table_id,))
+                print(f"Fetching table with ID: {table_id}")
+
                 table = cursor.fetchone()
+                
+                print(f"Fetched table data: {table}")
+
 
                 if table:
+                    is_empty = table[0] == 0
+                    print(is_empty)
                     self.send_response(200)
                     self.send_header('Content-type', 'application/json')
                     self.end_headers()
-                    self.wfile.write(json.dumps({"exists": True}).encode())
+                    self.wfile.write(json.dumps({"isEmpty": is_empty}).encode())
                 else:
                     self.send_response(404)
                     self.send_header('Content-type', 'application/json')
                     self.end_headers()
-                    self.wfile.write(json.dumps({"exists": False}).encode())
-
+                    self.wfile.write(json.dumps({"isEmpty": False}).encode())
             else:
                 self.send_response(404)
+                self.send_header('Content-type', 'application/json')
                 self.end_headers()
+                self.wfile.write(json.dumps({"isEmpty": False}).encode())
 
         except mysql.connector.Error as err:
             self.send_response(500)
