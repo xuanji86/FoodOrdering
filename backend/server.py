@@ -43,7 +43,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 
                 cursor.execute("SELECT Password FROM Manager WHERE UserName=%s", (username,))
                 stored_password = cursor.fetchone()
-                if password == stored_password[0]:
+                if stored_password and password == stored_password[0]:
                     session_id = str(uuid.uuid4())
                     SESSION_STORE[session_id] = username
                     
@@ -85,9 +85,10 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                     conn.commit()
                 else:
                     self.send_response(404)
+                    print("not found ID")
                     self.send_header('Content-type', 'application/json')
                     self.end_headers()
-                    self.wfile.write(json.dumps({"isEmpty": False}).encode())
+                    self.wfile.write(json.dumps({"message": "Table not found"}).encode())
             else:
                 self.send_response(404)
                 self.send_header('Content-type', 'application/json')
