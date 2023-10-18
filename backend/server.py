@@ -106,10 +106,9 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
             conn.close()
 
     def do_GET(self):
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
         if self.path == '/get-menu':
-            conn = get_db_connection()
-            cursor = conn.cursor(dictionary=True)
-
             try:
                 cursor.execute("SELECT * FROM MENU")
                 menu = cursor.fetchall()
@@ -124,11 +123,23 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"message": f"Database error: {str(err)}"}).encode())
+                
+        elif self.path == '/get-tables':
+            try:
+                cursor.execute("SELECT * FROM Table_")
+                tables = cursor.fetchall()
 
-            finally:
-                cursor.close()
-                conn.close()
-        if self.path == '/some-protected-endpoint':
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps(tables).encode())
+            except mysql.connector.Error as err:
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"message": f"Database error: {str(err)}"}).encode())
+                
+        elif self.path == '/some-protected-endpoint':
         # Get the session ID from the cookie
             cookie_header = self.headers.get('Cookie')
             if not cookie_header or 'session_id' not in cookie_header:

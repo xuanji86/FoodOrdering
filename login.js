@@ -11,18 +11,24 @@ function checkLoginStatus() {
     const username = getCookie('loggedInUser');
     const adminButton = document.getElementById('admin-button');
     const dropdownContent = document.getElementById('dropdown-content');
-    dropdownContent.classList.add('hidden');
+    const startOrderingSection = document.getElementById('start-ordering');
+    const orderQueueSection = document.getElementById('manager-section');
 
+    dropdownContent.classList.add('hidden');
 
     if (username) {
         adminButton.innerText = username;
         adminButton.onclick = toggleDropdown;
+        startOrderingSection.classList.add('hidden');
+        orderQueueSection.classList.remove('hidden');
     } else {
         adminButton.innerText = 'Admin Login';
         adminButton.onclick = showLogin;
-        dropdownContent.classList.add('hidden');
+        startOrderingSection.classList.remove('hidden');
+        orderQueueSection.classList.add('hidden');
     }
 }
+
 
 function toggleDropdown() {
     const dropdownContent = document.getElementById('dropdown-content');
@@ -76,6 +82,8 @@ function logout() {
     adminButton.onclick = showLogin;
     const dropdownContent = document.getElementById('dropdown-content');
     dropdownContent.classList.add('hidden');
+    checkLoginStatus();  // 调用这个函数来更新页面内容
 }
+
 
 window.onload = checkLoginStatus;
