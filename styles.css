@@ -137,3 +137,18 @@ input {
     padding: 20px;
 }
 
+#menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#add-item {
+    margin-bottom: 20px;
+}
+
+#new-item-name, #new-item-price {
+    padding: 5px;
+}
+
+
