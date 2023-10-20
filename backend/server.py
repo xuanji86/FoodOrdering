@@ -89,6 +89,36 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_header('Content-type', 'application/json')
                     self.end_headers()
                     self.wfile.write(json.dumps({"message": "Table not found"}).encode())
+                    
+            elif self.path == '/delete-item':
+                post_data = self.rfile.read(int(self.headers.get('content-length')))
+                data = json.loads(post_data.decode('utf-8'))
+                item_id = data.get('itemID')
+                
+                cursor.execute("DELETE FROM Menu WHERE ItemID=%s", (item_id,))
+                conn.commit()
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"message": "Item deleted successfully!"}).encode())
+                
+            elif self.path == '/add-item':
+                post_data = self.rfile.read(int(self.headers.get('content-length')))
+                data = json.loads(post_data.decode('utf-8'))
+                item_name = data.get('itemName')
+                price = data.get('price')
+                print(item_name)
+                print(price)
+                
+                cursor.execute("INSERT INTO Menu (ItemName, Price) VALUES (%s, %s)", (item_name, price))
+                conn.commit()
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"message": "Item added successfully!"}).encode())
+
             else:
                 self.send_response(404)
                 self.send_header('Content-type', 'application/json')
@@ -110,8 +140,8 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         cursor = conn.cursor(dictionary=True)
         if self.path == '/get-menu':
             try:
-                cursor.execute("SELECT * FROM MENU")
-                menu = cursor.fetchall()
+                cursor.execute("SELECT * FROM Menu")
+                menu = [{"ItemID": item["ItemID"], "ItemName": item["ItemName"], "Price": str(item["Price"])} for item in cursor.fetchall()]
 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
