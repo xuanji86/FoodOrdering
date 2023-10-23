@@ -32,3 +32,49 @@ function loadTables() {
             alert('An error occurred. Please try again.');
         });
 }
+function getMenu() {
+    fetch('http://127.0.0.1:8080/get-menu').then(response => response.json()).then(data => {
+        const menuDiv = document.getElementById('menu');
+        menuDiv.innerHTML = '';  // Clear previous items
+        data.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.innerHTML = `${item.ItemName} - ${item.Price} <button onclick="deleteItem(${item.ItemID})">Delete</button>`;
+            menuDiv.appendChild(itemDiv);
+        });
+    });
+}
+
+function deleteItem(itemID) {
+    fetch('http://127.0.0.1:8080/delete-item', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ itemID: itemID })
+    }).then(response => {
+        if (response.ok) {
+            getMenu();  // Refresh the menu after deleting an item
+        }
+    });
+}
+
+function addItem() {
+    const itemName = document.getElementById('new-item-name').value;
+    const itemPrice = document.getElementById('new-item-price').value;
+    
+    fetch('http://127.0.0.1:8080/add-item', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ itemName: itemName, price: itemPrice })
+    }).then(response => {
+        if (response.ok) {
+            getMenu();  // Refresh the menu after adding a new item
+        }
+    });
+}
+
+
+getMenu();  // Call this function to populate the menu when the page loads
+

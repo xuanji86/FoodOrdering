@@ -140,8 +140,35 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 response_message = {"message": "Order placed successfully!", "table_id": table_id,
                                     "cartContents": cart_contents, "currentTime": current_time}
                 self.wfile.write(json.dumps(response_message).encode())
-
-            #end
+                    
+            elif self.path == '/delete-item':
+                post_data = self.rfile.read(int(self.headers.get('content-length')))
+                data = json.loads(post_data.decode('utf-8'))
+                item_id = data.get('itemID')
+                
+                cursor.execute("DELETE FROM Menu WHERE ItemID=%s", (item_id,))
+                conn.commit()
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"message": "Item deleted successfully!"}).encode())
+                
+            elif self.path == '/add-item':
+                post_data = self.rfile.read(int(self.headers.get('content-length')))
+                data = json.loads(post_data.decode('utf-8'))
+                item_name = data.get('itemName')
+                price = data.get('price')
+                print(item_name)
+                print(price)
+                
+                cursor.execute("INSERT INTO Menu (ItemName, Price) VALUES (%s, %s)", (item_name, price))
+                conn.commit()
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"message": "Item added successfully!"}).encode())
             else:
                 self.send_response(404)
                 self.send_header('Content-type', 'application/json')
