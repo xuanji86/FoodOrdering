@@ -91,6 +91,44 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_header('Content-type', 'application/json')
                     self.end_headers()
                     self.wfile.write(json.dumps({"message": "Table not found"}).encode())
+                    
+            elif self.path =="/remove-table":
+                length = int(self.headers.get('content-length'))
+                post_data = self.rfile.read(length)
+                data = json.loads(post_data.decode('utf-8'))
+
+                table_id = data.get('tableID')
+                print(f"Given table_id: {table_id}")
+                
+                if table_id != None:
+                    cursor.execute("DELETE FROM Table_ WHERE TableID=%s", (table_id,))
+                    conn.commit()
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"message": "Table removed successfully!"}).encode())
+                else:
+                    self.send_response(404)
+                    print("not found ID")
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"message": "Table not found"}).encode())
+                    
+            elif self.path == "/add-table":
+                try:
+                    cursor.execute("INSERT INTO Table_ (IsEmpty) VALUES (1)") # 1 signifies the table is empty.
+                    conn.commit()
+                    
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"message": "Table added successfully!"}).encode())
+                except mysql.connector.Error as err:
+                    self.send_response(500)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"message": f"Database error: {str(err)}"}).encode())
+
 
             elif self.path == '/place-order':
                 length = int(self.headers.get('content-length'))

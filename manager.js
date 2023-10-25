@@ -1,46 +1,53 @@
-function showTab(tabId) {
-    // Hide all sections
-    document.getElementById('table-section').style.display = 'none';
-    document.getElementById('menu-section').style.display = 'none';
-
-    // Remove active class from all tab buttons
-    const tabButtons = document.querySelectorAll('.tab-button');
-    tabButtons.forEach(button => button.classList.remove('active'));
-
-    // Show the selected section and mark the tab button as active
-    document.getElementById(tabId).style.display = 'block';
-    document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
-    if (tabId === 'table-section') {
-        loadTables();
-    }
-}
-
 function loadTables() {
     fetch('http://127.0.0.1:8080/get-tables')
-        .then(response => response.json())
-        .then(tables => {
-            const tableSection = document.getElementById('table-section');
-            tableSection.innerHTML = ''; // Clear previous data
-            tables.forEach(table => {
-                const tableDiv = document.createElement('div');
-                tableDiv.innerHTML = `Table ID: ${table.TableID} - Status: ${table.IsEmpty ? 'Empty' : 'Occupied'}`;
-                tableSection.appendChild(tableDiv);
-            });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred. Please try again.');
+    .then(response => response.json())
+    .then(table => {
+
+        const dpy = document.querySelector('.containerp');
+
+        // Get the menu container element
+        const tableContainer = document.querySelector('.table');
+
+
+        // Display the menu and allow users to add dishes to the cart
+        table.forEach(tableData => {
+            const tableId = tableData[0];
+            const  tableStatus = tableData[1]? "Occupied":"Available";
+
+            // Create a table item div
+            const tableItem = document.createElement('div');
+            tableItem.classList.add('table-item');
+
+            const tableIdElement = document.createElement('span');
+            tableIdElement.textContent = "Table: " + tableId;
+
+
+            const tableStatusElement = document.createElement('span');
+            tableStatusElement.textContent = "Status: "+ tableStatus;
+
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.addEventListener('click', () => {
+                    removeTable(tableId);
+                }
+            );
+            const showOrderButton = document.createElement('button');
+            showOrderButton.textContent = 'Order Details';
+
+            // Append elements to the menu item div
+            tableItem.appendChild(tableIdElement);
+            tableItem.appendChild(tableStatusElement);
+            tableItem.appendChild(removeButton);
+            tableItem.appendChild(showOrderButton);
+
+            // Append the table item to the menu container
+            tableContainer.appendChild(tableItem);
         });
-}
-function getMenu() {
-    fetch('http://127.0.0.1:8080/get-menu').then(response => response.json()).then(data => {
-        const menuDiv = document.getElementById('menu');
-        menuDiv.innerHTML = '';  // Clear previous items
-        data.forEach(item => {
-            const itemDiv = document.createElement('div');
-            itemDiv.innerHTML = `${item.ItemName} - ${item.Price} <button onclick="deleteItem(${item.ItemID})">Delete</button>`;
-            menuDiv.appendChild(itemDiv);
-        });
+        dpy.style.display = 'flex';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
     });
 }
 
@@ -53,10 +60,40 @@ function deleteItem(itemID) {
         body: JSON.stringify({ itemID: itemID })
     }).then(response => {
         if (response.ok) {
-            getMenu();  // Refresh the menu after deleting an item
+            location.reload();  // Refresh the menu after deleting an item
         }
     });
 }
+
+function removeTable(tableID) {
+    fetch('http://127.0.0.1:8080/remove-table', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ tableID: tableID })
+    }).then(response => {
+        if (response.ok) {
+            location.reload();  // Refresh the menu after deleting an item
+        }
+    }
+    );
+}
+function addTable() {
+    fetch('http://127.0.0.1:8080/add-table', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    }).then(response => {
+        if (response.ok) {
+            location.reload();  // Refresh the menu after deleting an item
+        }
+    }
+    );
+}
+
 
 function addItem() {
     const itemName = document.getElementById('new-item-name').value;
@@ -70,11 +107,61 @@ function addItem() {
         body: JSON.stringify({ itemName: itemName, price: itemPrice })
     }).then(response => {
         if (response.ok) {
-            getMenu();  // Refresh the menu after adding a new item
+            location.reload();  // Refresh the menu after adding a new item
         }
     });
 }
+function showMenu() {
+    fetch('http://127.0.0.1:8080/get-menu')
+        .then(response => response.json())
+        .then(menu => {
+
+            const dpy = document.querySelector('.containerp');
+
+            // Get the menu container element
+            const menuContainer = document.querySelector('.menu');
 
 
-getMenu();  // Call this function to populate the menu when the page loads
+            // Display the menu and allow users to add dishes to the cart
+            menu.forEach(dishData => {
+                const dishName = dishData[1];
+                const dishPrice = dishData[2];
+
+                // Create a menu item div
+                const menuItem = document.createElement('div');
+                menuItem.classList.add('menu-item');
+                // Create elements for dish name, price, and add button
+                const dishNameElement = document.createElement('span');
+                dishNameElement.textContent = dishName;
+
+                const dishPriceElement = document.createElement('span');
+                dishPriceElement.textContent = dishPrice;
+
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'remove';
+                removeButton.addEventListener('click', () => {
+                        deleteItem(dishId);
+                    }
+                );
+                
+
+                // Append elements to the menu item div
+                menuItem.appendChild(dishNameElement);
+                menuItem.appendChild(dishPriceElement);
+                menuItem.appendChild(removeButton);
+
+                // Append the menu item to the menu container
+                menuContainer.appendChild(menuItem);
+            });
+            dpy.style.display = 'flex';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
+}
+
+
+showMenu();  // Call this function to populate the menu when the page loads
+loadTables();
 
