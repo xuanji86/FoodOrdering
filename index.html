@@ -32,19 +32,16 @@
             <button onclick="startOrder()">Order</button>
         </div>
 
-        <div class="manager-section" id="manager-section" class="hidden">
+        <!-- <div class="manager-section" id="manager-section" class="hidden">
             <div class="tab-nav">
                 <button class="tab-button" onclick="showTab('table-section')">Table</button>
                 <button class="tab-button" onclick="showTab('menu-section')">Menu</button>
             </div>
 
-            <!-- Table Tab Content -->
             <div class="table-section" id="table-section">
                 <h2>Tables</h2>
-                <!-- Here you can add the tables UI as per the mockup -->
             </div>
 
-            <!-- Menu Tab Content -->
             <div class="menu-section" id="menu-section" class="hidden">
                 <h2>Menu</h2>
                 <div id="add-item">
@@ -53,9 +50,32 @@
                     <button onclick="addItem()">Add Item</button>
                 </div>
                 <div id="menu">
-                    <!-- Items will be dynamically populated here using JavaScript -->
                 </div>
-                <!-- Here you can add the menu UI as per the mockup -->
+            </div>
+        </div> -->
+        <div class = "manager-section" id="manager-section" class="hidden">
+            <h2>Manager dashboard</h2>
+            <div class="containerp" style="display: flex">
+                <div class="table">
+                    <h2>Table</h2>
+                    <div id="table">
+                        <button onclick="addTable()">Add Table</button>
+                    </div>
+                </div>
+                <div class="menu">
+                    <h2>Menu</h2>
+                    <div id="add-item">
+                        <input type="text" id="new-item-name" placeholder="New Item Name">
+                        <input type="number" id="new-item-price" placeholder="Price">
+                        <button onclick="addItem()">Add Item</button>
+                    </div>
+                </div>
+                <div class="order">
+                    <h2>Order</h2>
+                    <div class="Order-items">
+                </div>
+
+                </div>
             </div>
         </div>
 

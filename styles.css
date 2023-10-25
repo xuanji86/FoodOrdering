@@ -153,6 +153,22 @@ input {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
+.table {
+    flex: 1;
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-right: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+.order {
+    flex: 1;
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-right: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
 
 .cart {
     flex: 1;
@@ -163,6 +179,13 @@ input {
 }
 
 .menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.table-item{
     display: flex;
     justify-content: space-between;
     align-items: center;
