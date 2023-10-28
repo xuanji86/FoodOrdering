@@ -9,9 +9,9 @@ import sys
 import uuid
 from datetime import datetime
 
-
 PORT = 8080
 SESSION_STORE = {}
+
 
 # Database connection function
 def get_db_connection():
