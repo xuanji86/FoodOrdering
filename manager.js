@@ -123,6 +123,7 @@ function showMenu() {
 
             // Display the menu and allow users to add dishes to the cart
             menu.forEach(dishData => {
+                const dishId = dishData[0];
                 const dishName = dishData[1];
                 const dishPrice = dishData[2];
 
@@ -130,6 +131,10 @@ function showMenu() {
                 const menuItem = document.createElement('div');
                 menuItem.classList.add('menu-item');
                 // Create elements for dish name, price, and add button
+                
+                const dishIdElement = document.createElement('span');
+                dishIdElement.textContent = dishId;
+
                 const dishNameElement = document.createElement('span');
                 dishNameElement.textContent = dishName;
 
@@ -145,6 +150,7 @@ function showMenu() {
 
 
                 // Append elements to the menu item div
+                menuItem.appendChild(dishIdElement);
                 menuItem.appendChild(dishNameElement);
                 menuItem.appendChild(dishPriceElement);
                 menuItem.appendChild(removeButton);
