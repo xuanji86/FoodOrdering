@@ -1,54 +1,54 @@
 function loadTables() {
     fetch('http://127.0.0.1:8080/get-tables')
-    .then(response => response.json())
-    .then(table => {
+        .then(response => response.json())
+        .then(table => {
 
-        const dpy = document.querySelector('.containerp');
+            const dpy = document.querySelector('.containerp');
 
-        // Get the menu container element
-        const tableContainer = document.querySelector('.table');
-
-
-        // Display the menu and allow users to add dishes to the cart
-        table.forEach(tableData => {
-            const tableId = tableData[0];
-            const  tableStatus = tableData[1]? "Occupied":"Available";
-
-            // Create a table item div
-            const tableItem = document.createElement('div');
-            tableItem.classList.add('table-item');
-
-            const tableIdElement = document.createElement('span');
-            tableIdElement.textContent = "Table: " + tableId;
+            // Get the menu container element
+            const tableContainer = document.querySelector('.table');
 
 
-            const tableStatusElement = document.createElement('span');
-            tableStatusElement.textContent = "Status: "+ tableStatus;
+            // Display the menu and allow users to add dishes to the cart
+            table.forEach(tableData => {
+                const tableId = tableData[0];
+                const tableStatus = tableData[1] ? "Occupied" : "Available";
 
-            const removeButton = document.createElement('button');
-            removeButton.textContent = 'Remove';
-            removeButton.addEventListener('click', () => {
+                // Create a table item div
+                const tableItem = document.createElement('div');
+                tableItem.classList.add('table-item');
+
+                const tableIdElement = document.createElement('span');
+                tableIdElement.textContent = "Table: " + tableId;
+
+
+                const tableStatusElement = document.createElement('span');
+                tableStatusElement.textContent = "Status: " + tableStatus;
+
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'Remove';
+                removeButton.addEventListener('click', () => {
                     removeTable(tableId);
                 }
-            );
-            const showOrderButton = document.createElement('button');
-            showOrderButton.textContent = 'Order Details';
+                );
+                const showOrderButton = document.createElement('button');
+                showOrderButton.textContent = 'Order Details';
 
-            // Append elements to the menu item div
-            tableItem.appendChild(tableIdElement);
-            tableItem.appendChild(tableStatusElement);
-            tableItem.appendChild(removeButton);
-            tableItem.appendChild(showOrderButton);
+                // Append elements to the menu item div
+                tableItem.appendChild(tableIdElement);
+                tableItem.appendChild(tableStatusElement);
+                tableItem.appendChild(removeButton);
+                tableItem.appendChild(showOrderButton);
 
-            // Append the table item to the menu container
-            tableContainer.appendChild(tableItem);
+                // Append the table item to the menu container
+                tableContainer.appendChild(tableItem);
+            });
+            dpy.style.display = 'flex';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
         });
-        dpy.style.display = 'flex';
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-    });
 }
 
 function deleteItem(itemID) {
@@ -98,7 +98,7 @@ function addTable() {
 function addItem() {
     const itemName = document.getElementById('new-item-name').value;
     const itemPrice = document.getElementById('new-item-price').value;
-    
+
     fetch('http://127.0.0.1:8080/add-item', {
         method: 'POST',
         headers: {
@@ -140,10 +140,10 @@ function showMenu() {
                 const removeButton = document.createElement('button');
                 removeButton.textContent = 'remove';
                 removeButton.addEventListener('click', () => {
-                        deleteItem(dishId);
-                    }
+                    deleteItem(dishId);
+                }
                 );
-                
+
 
                 // Append elements to the menu item div
                 menuItem.appendChild(dishNameElement);

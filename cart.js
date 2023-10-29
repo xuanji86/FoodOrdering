@@ -1,5 +1,24 @@
-// 1. 定义一个购物车数据结构
+
 const shoppingCart = [];
+let totalAmount = 0;
+
+function updateCartTotal() {
+    const totalElement = document.getElementById('cart-total');
+    totalElement.textContent = totalAmount.toFixed(2);
+}
+
+function removeCartItem(cartItem, index) {
+
+    const removedItem = shoppingCart.splice(index, 1)[0];
+
+
+    cartItem.remove();
+
+    // delete the item price in shooping cart
+    totalAmount -= parseFloat(removedItem.price);
+    updateCartTotal();
+}
+
 
 function showMenu() {
     fetch('http://127.0.0.1:8080/get-menu')
@@ -13,6 +32,9 @@ function showMenu() {
 
             // Get the cart container element
             const cartContainer = document.querySelector('.cart-items');
+
+            //Get the total element
+            const totalElement = document.getElementById('cart-total');
 
             // Display the menu and allow users to add dishes to the cart
             menu.forEach(dishData => {
@@ -34,16 +56,26 @@ function showMenu() {
                 dishPriceElement.textContent = dishPrice;
 
                 const addButton = document.createElement('button');
-                addButton.textContent = 'Add';
+                addButton.textContent = 'add';
                 addButton.addEventListener('click', () => {
-                    // 2. 将选定的菜品添加到购物车数据结构
+                    // Add the selected dish to the cart data structure
                     shoppingCart.push({ id: dishId, name: dishName, price: dishPrice });
 
-                    // 3. 更新购物车的DOM元素
+                    // Update the cart's DOM elements
                     const cartItem = document.createElement('div');
                     cartItem.classList.add('item');
-                    cartItem.innerHTML = `<span>${dishId}</span> <span>${dishName}</span> <span>${dishPrice}</span>`;
+                    cartItem.innerHTML = `<span>${dishId}</span> <span>${dishName}</span> <span>${dishPrice}</span> <button class="remove-button">remove</button>`;
                     cartContainer.appendChild(cartItem);
+
+                    // Calculate the total amount and update the display
+                    totalAmount += parseFloat(dishPrice);
+                    updateCartTotal();
+
+                    // Add a click event for the "Remove" button
+                    const removeButton = cartItem.querySelector('.remove-button');
+                    removeButton.addEventListener('click', () => {
+                        removeCartItem(cartItem, shoppingCart.length - 1);
+                    });
                 });
 
                 // Append elements to the menu item div
@@ -63,31 +95,31 @@ function showMenu() {
         });
 }
 
-// 获取 Place Order 按钮和 Checkout 按钮的元素
+// Get Place Order button and  Checkout button
 const placeOrderButton = document.querySelector('#place-order-button');
 const checkoutButton = document.querySelector('#checkout-button');
 
-// Place Order 按钮点击事件处理程序
+// Place Order 
 placeOrderButton.addEventListener('click', () => {
-    // 获取当前时间
+    // get Current Time
     const currentTime = new Date().toLocaleString();
-    // 获取当前页面的 URL
+    // get current URL
     const url = new URL(window.location.href);
-    // 创建 URLSearchParams 对象以解析 URL 查询参数
+    // create URLSearchParams 
     const params = new URLSearchParams(url.search);
-    // 获取参数 "TableID" 的值
+    // Get "TableID" value
     const tableID = params.get('TableID');
 
-    console.log(tableID); // 输出参数值
-    // 将购物车内容和当前时间发送到后端
+    console.log(tableID); // output value
+    // sent the shopping cart and current time to backend.
     const data = {
         tableID: tableID,
-        cartContents: shoppingCart, // 假设购物车数据存在 shoppingCart 变量中
+        cartContents: shoppingCart,
         currentTime: currentTime,
     };
 
     console.log(shoppingCart)
-    // 发送 POST 请求到后端
+    // sent POST
     fetch('http://127.0.0.1:8080/place-order', {
         method: 'POST',
         headers: {
@@ -97,9 +129,9 @@ placeOrderButton.addEventListener('click', () => {
     })
         .then(response => {
             if (response.ok) {
-                // 订单成功提交
+                // Order placed successfully
                 alert('Order placed successfully!');
-                // 可以在这里清空购物车等其他操作
+
             } else {
                 alert('Failed to place the order. Please try again.');
             }
@@ -110,26 +142,22 @@ placeOrderButton.addEventListener('click', () => {
         });
 });
 
-// Checkout 按钮点击事件处理程序
+// Checkout 
 checkoutButton.addEventListener('click', () => {
-    // 计算购物车中菜品的总价格
+    // count total
     let totalAmount = 0;
     shoppingCart.forEach(item => {
         totalAmount += item.price;
     });
 
-    // 显示购物车内容和总价格
+    // show price
     const cartContents = shoppingCart.map(item => `${item.name} - ${item.price}`).join('\n');
     alert(`Your Order:\n${cartContents}\nTotal Amount: $${totalAmount.toFixed(2)}`);
+    window.location.href = 'index.html';
 
-    // 在这里可以添加付款逻辑，例如调用支付接口
-    // 如果有支付集成，你可以在这里触发付款过程
+    shoppingCart.length = 0; // clean shoopinf cart
 
-    // 清空购物车或者进行其他必要的清理操作
-    shoppingCart.length = 0; // 清空购物车
 
-    // 如果有付款成功的确认，可以显示成功消息
-    // alert('Payment successful!');
 });
 
 showMenu()
