@@ -16,7 +16,8 @@ function startOrder() {
                     if (data.isEmpty) {
                         // If table exists and is empty, show the menu and ordering options
                         alert("welcom!")
-                        showMenu();
+                        //showMenu();
+                        window.location.href = '/order.html?TableID=' + tableNumber
                     } else {
                         alert('Table is already occupied.');
                     }
@@ -34,31 +35,31 @@ function startOrder() {
 }
 
 
-function showMenu() {
-    fetch('http://127.0.0.1:8080/get-menu')
-        .then(response => response.json())
-        .then(menu => {
-            // Display the menu and allow users to add dishes to the cart
-            const menuDiv = document.getElementById('menu');
-            menu.forEach(dish => {
-                const dishDiv = document.createElement('div');
-                dishDiv.innerHTML = `
-                ${dish.DishName} - ${dish.Price} 
-                <button onclick="addToCart(${dish.DishID}, '${dish.DishName}', ${dish.Price})">Add to Cart</button>
-            `;
-                menuDiv.appendChild(dishDiv);
-            });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred. Please try again.');
-        });
-}
+// function showMenu() {
+//     fetch('http://127.0.0.1:8080/get-menu')
+//         .then(response => response.json())
+//         .then(menu => {
+//             // Display the menu and allow users to add dishes to the cart
+//             const menuDiv = document.getElementById('menu');
+//             menu.forEach(dish => {
+//                 const dishDiv = document.createElement('div');
+//                 dishDiv.innerHTML = `
+//                 ${dish.DishName} - ${dish.Price} 
+//                 <button onclick="addToCart(${dish.DishID}, '${dish.DishName}', ${dish.Price})">Add to Cart</button>
+//             `;
+//                 menuDiv.appendChild(dishDiv);
+//             });
+//         })
+//         .catch(error => {
+//             console.error('Error:', error);
+//             alert('An error occurred. Please try again.');
+//         });
+// }
 
-function addToCart(dishID, dishName, price) {
-    cart.push({ dishID, dishName, price });
-}
+// function addToCart(dishID, dishName, price) {
+//     cart.push({ dishID, dishName, price });
+// }
 
-function placeOrder() {
+// function placeOrder() {
 
-}
+// }

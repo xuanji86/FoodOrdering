@@ -1,15 +1,17 @@
 import http.server
 import socketserver
 import json
+from decimal import Decimal
 import mysql.connector
 from urllib.parse import parse_qs
 import threading
 import sys
 import uuid
-
+from datetime import datetime
 
 PORT = 8080
 SESSION_STORE = {}
+
 
 # Database connection function
 def get_db_connection():
@@ -20,6 +22,7 @@ def get_db_connection():
         password="xuanji1998",
         database="FoodOrder"
     )
+
 
 class MyHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -73,7 +76,6 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 
                 print(f"Fetched table data: {table}")
 
-
                 if table:
                     is_empty = table[0] == 0
                     print(is_empty)
@@ -89,6 +91,122 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_header('Content-type', 'application/json')
                     self.end_headers()
                     self.wfile.write(json.dumps({"message": "Table not found"}).encode())
+                    
+            elif self.path =="/remove-table":
+                length = int(self.headers.get('content-length'))
+                post_data = self.rfile.read(length)
+                data = json.loads(post_data.decode('utf-8'))
+
+                table_id = data.get('tableID')
+                print(f"Given table_id: {table_id}")
+                
+                if table_id != None:
+                    cursor.execute("DELETE FROM Table_ WHERE TableID=%s", (table_id,))
+                    conn.commit()
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"message": "Table removed successfully!"}).encode())
+                else:
+                    self.send_response(404)
+                    print("not found ID")
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"message": "Table not found"}).encode())
+                    
+            elif self.path == "/add-table":
+                try:
+                    cursor.execute("INSERT INTO Table_ (IsEmpty) VALUES (1)") # 1 signifies the table is empty.
+                    conn.commit()
+                    
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"message": "Table added successfully!"}).encode())
+                except mysql.connector.Error as err:
+                    self.send_response(500)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"message": f"Database error: {str(err)}"}).encode())
+
+
+            elif self.path == '/place-order':
+                length = int(self.headers.get('content-length'))
+                post_data =self.rfile.read(length)
+                print(post_data.decode('utf-8'))
+                data = eval(post_data.decode('utf-8'))
+
+                # 在这里处理购物车数据和时间戳
+                cart_contents = data.get('cartContents')
+                table_id = data.get('tableID')
+                current_time = data.get('currentTime').replace('/', '-')
+
+                date_format_input = "%m-%d-%Y, %I:%M:%S %p"
+                date_format_output = "%Y-%m-%d %H:%M:%S"
+                converted_date = datetime.strptime(current_time, date_format_input).strftime(date_format_output)
+                
+
+                TotalAmount = 0
+                for car in cart_contents:
+                    print(car)
+                    TotalAmount += car.get('price')
+
+                # 在这里可以执行保存订单和处理付款的逻辑 str(current_time)
+                insert_query = "INSERT INTO Order_ (TableID, OrderDate, TotalAmount, OrderStatus) VALUES (%s, %s, %s, %s)"
+                data_to_insert = (int(table_id),converted_date, float(TotalAmount), "In Process")
+                print(data_to_insert)
+                cursor.execute(insert_query, data_to_insert)
+                conn.commit()
+
+                # 获取插入行的自增 ID
+                inserted_id = cursor.lastrowid
+
+                insert_order_line_query = "INSERT INTO OrderLine (ItemID, OrderID, Quantity, Subtotal) VALUES (%s, %s, %s, %s)"
+
+                data_list = []
+                for dt in cart_contents:
+                    data_list.append((dt.get('id'), inserted_id, 1, dt.get('price')))
+
+                cursor.executemany(insert_order_line_query, data_list)
+                #提交事物
+                conn.commit()
+
+                #响应客户端
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response_message = {"message": "Order placed successfully!", "table_id": table_id,
+                                    "cartContents": cart_contents, "currentTime": current_time}
+                self.wfile.write(json.dumps(response_message).encode())
+                    
+            elif self.path == '/delete-item':
+                post_data = self.rfile.read(int(self.headers.get('content-length')))
+                data = json.loads(post_data.decode('utf-8'))
+                item_id = data.get('itemID')
+                
+                cursor.execute("DELETE FROM Menu WHERE ItemID=%s", (item_id,))
+                conn.commit()
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"message": "Item deleted successfully!"}).encode())
+                
+            elif self.path == '/add-item':
+                post_data = self.rfile.read(int(self.headers.get('content-length')))
+                data = json.loads(post_data.decode('utf-8'))
+                item_name = data.get('itemName')
+                price = data.get('price')
+                print(item_name)
+                print(price)
+                
+                cursor.execute("INSERT INTO Menu (ItemName, Price) VALUES (%s, %s)", (item_name, price))
+                conn.commit()
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"message": "Item added successfully!"}).encode())
             else:
                 self.send_response(404)
                 self.send_header('Content-type', 'application/json')
@@ -107,23 +225,33 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor()
         if self.path == '/get-menu':
+            # 自定义JSON编码器，处理Decimal对象
+            class DecimalEncoder(json.JSONEncoder):
+                def default(self, o):
+                    if isinstance(o, Decimal):
+                        return float(o)
+                    return super(DecimalEncoder, self).default(o)
             try:
-                cursor.execute("SELECT * FROM MENU")
+                cursor.execute("SELECT * FROM Menu")
                 menu = cursor.fetchall()
 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
-                self.wfile.write(json.dumps(menu).encode())
-
+                # 使用自定义编码器将Decimal对象转换为JSON
+                data = json.dumps(menu, cls=DecimalEncoder).encode()
+                print(data)
+                self.wfile.write(data)
+                #self.wfile.write(json.dumps(menu).encode())
             except mysql.connector.Error as err:
                 self.send_response(500)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"message": f"Database error: {str(err)}"}).encode())
                 
+
         elif self.path == '/get-tables':
             try:
                 cursor.execute("SELECT * FROM Table_")
@@ -152,7 +280,14 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(401)
                 self.end_headers()
                 return
-
+            
+        elif self.path =='/order':
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            with open('../order.html', 'rb') as file:
+                self.wfile.write(file.read())
+        
         else:
             self.send_response(404)
             self.end_headers()

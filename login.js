@@ -51,28 +51,28 @@ function login() {
         },
         body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message === 'Logged in successfully!') {
-            alert('Logged in successfully!');
-            document.getElementById('login-form').style.display = 'none';
-            
-            // Set the cookie for the logged-in user
-            setCookie('loggedInUser', username, 1);  // 1 day expiration
-            
-            // Change the button text to the logged-in username
-            // const adminButton = document.getElementById('admin-button');
-            // adminButton.innerText = username;
-            checkLoginStatus();
-        } else {
-            alert('Invalid credentials!');
-            console.log(data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'Logged in successfully!') {
+                alert('Logged in successfully!');
+                document.getElementById('login-form').style.display = 'none';
+
+                // Set the cookie for the logged-in user
+                setCookie('loggedInUser', username, 1);  // 1 day expiration
+
+                // Change the button text to the logged-in username
+                // const adminButton = document.getElementById('admin-button');
+                // adminButton.innerText = username;
+                checkLoginStatus();
+            } else {
+                alert('Invalid credentials!');
+                console.log(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
 }
 
 function logout() {
