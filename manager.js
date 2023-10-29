@@ -47,7 +47,6 @@ function loadTables() {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred. Please try again.');
         });
 }
 
@@ -157,7 +156,6 @@ function showMenu() {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred. Please try again.');
         });
 }
 
