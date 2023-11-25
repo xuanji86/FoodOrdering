@@ -56,13 +56,14 @@ function loadTables() {
         });
 }
 
-function deleteItem(itemID) {
+function deleteItem(itemName) {
     fetch('http://127.0.0.1:8080/delete-item', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ itemID: itemID })
+        body: JSON.stringify({ itemName: itemName })
+        
     }).then(response => {
         if (response.ok) {
             location.reload();  // Refresh the menu after deleting an item
@@ -156,7 +157,7 @@ function showMenu() {
                 const removeButton = document.createElement('button');
                 removeButton.textContent = 'remove';
                 removeButton.addEventListener('click', () => {
-                    deleteItem(dishId);
+                    deleteItem(dishName);
                 }
                 );
 

@@ -149,12 +149,14 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"message": "Item added successfully!"}).encode())
                 
             elif self.path == '/delete-item':
+                print("Deleting item")
                 post_data = self.rfile.read(int(self.headers.get('content-length')))
                 data = json.loads(post_data.decode('utf-8'))
-                item_id = data.get('itemID')
+                print(data)
+                item_name = data.get('itemName')
         
                 # Assuming each item in the menu is a field in a hash named 'menu'
-                result = conn.hdel("menu", item_id)
+                result = conn.hdel("menu", item_name)
 
                 if result:  # Check if a field was actually deleted
                     self.send_response(200)
