@@ -37,10 +37,8 @@ function showMenu() {
             const totalElement = document.getElementById('cart-total');
 
             // Display the menu and allow users to add dishes to the cart
-            menu.forEach(dishData => {
-                const dishId = dishData[0];
-                const dishName = dishData[1];
-                const dishPrice = dishData[2];
+            Object.entries(menu).forEach(([dishName, dishPrice], index=0) =>  {
+                const dishId = index+1;
 
                 // Create a menu item div
                 const menuItem = document.createElement('div');

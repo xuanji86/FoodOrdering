@@ -2,17 +2,23 @@ function loadTables() {
     fetch('http://127.0.0.1:8080/get-tables')
         .then(response => response.json())
         .then(table => {
-
+            if (!Array.isArray(table)) {
+                console.error('Expected an array for table data, but received:', table);
+                return;
+            }
             const dpy = document.querySelector('.containerp');
 
             // Get the menu container element
             const tableContainer = document.querySelector('.table');
 
-
+            // Sort the tables by TableID in ascending order
+            table.sort((a, b) => parseInt(a.TableID) - parseInt(b.TableID));
             // Display the menu and allow users to add dishes to the cart
             table.forEach(tableData => {
-                const tableId = tableData[0];
-                const tableStatus = tableData[1] ? "Occupied" : "Available";
+                const tableId = tableData.TableID;
+                const isTableEmpty = tableData.IsEmpty === '1';
+                const tableStatus = isTableEmpty ? "Available" : "Occupied";
+
 
                 // Create a table item div
                 const tableItem = document.createElement('div');
@@ -97,6 +103,13 @@ function addTable() {
 function addItem() {
     const itemName = document.getElementById('new-item-name').value;
     const itemPrice = document.getElementById('new-item-price').value;
+    const errorMessageElement = document.getElementById('error-message');
+
+    errorMessageElement.textContent = '';
+    if (!itemName.trim() || !itemPrice.trim()) {
+        errorMessageElement.textContent = "Invalid input.";
+        return;  // Exit the function if validation fails
+    }
 
     fetch('http://127.0.0.1:8080/add-item', {
         method: 'POST',
@@ -122,10 +135,9 @@ function showMenu() {
 
 
             // Display the menu and allow users to add dishes to the cart
-            menu.forEach(dishData => {
-                const dishId = dishData[0];
-                const dishName = dishData[1];
-                const dishPrice = dishData[2];
+            Object.entries(menu).forEach(([dishName, dishPrice], index=0) => {
+
+                const dishId = index+1;
 
                 // Create a menu item div
                 const menuItem = document.createElement('div');

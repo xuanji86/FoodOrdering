@@ -17,7 +17,7 @@ def get_redis_connection():
     return redis.Redis(
         host='redis-11266.c321.us-east-1-2.ec2.cloud.redislabs.com',  # Your Redis Labs host address
         port=11266,  # Your Redis Labs port
-        password='RchlGvyNFKBjT7OiwBfpOG3fNFSu0Eu2',  # Replace with your actual Redis Labs password
+        password='RchlGvyNFKBjT7OiwBfpOG3fNFSu0Eu2',  # Replace with your Redis Labs password
     )
 
 class MyHandler(http.server.SimpleHTTPRequestHandler):
@@ -96,6 +96,8 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                     result = conn.delete(f"table:{table_id}")
 
                     if result:  # Check if a key was actually deleted
+                        last_table_id = conn.decr("last_table_id")
+                        print(f"last_table_id decremented to: {last_table_id}")
                         self.send_response(200)
                         self.send_header('Content-type', 'application/json')
                         self.end_headers()
@@ -166,23 +168,42 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(json.dumps({"message": "Item not found"}).encode())
                     
-            else:
-                self.send_response(404)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"isEmpty": False}).encode())
+            elif self.path == 'check-table':
+                length = int(self.headers.get('content-length'))
+                post_data = self.rfile.read(length)
+                data = json.loads(post_data.decode('utf-8'))
+                table_id = data.get('tableID')
+                print(f"Given table_id: {table_id}")
+                is_empty = conn.hget(f"table:{table_id}", "IsEmpty")
+                if is_empty is not None:
+                    is_empty = is_empty.decode() == '1'  # Assuming '1' means empty, '0' means not empty
+                    print(is_empty)
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"isEmpty": is_empty}).encode())
+                    if not is_empty:
+                        conn.hset(f"table:{table_id}", "IsEmpty", '1')
+                else:
+                    self.send_response(404)
+                    print("Table not found")
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"message": "Table not found"}).encode())
+                
         except redis.exceptions.ConnectionError as err:
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({"message": f"Redis connection error: {str(err)}"}).encode())
+            
         finally:
             conn.close()
         
     def do_GET(self):
         conn = get_redis_connection()
-        if self.path == '/get-menu':
-            try:
+        try: 
+            if self.path == '/get-menu':
                 # Assuming the entire menu is stored in a hash named 'menu'
                 menu = conn.hgetall("menu")
 
@@ -192,41 +213,35 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
-
                 # No need for a custom JSON encoder as all values are now float or string
                 data = json.dumps(formatted_menu).encode()
                 print(data)
                 self.wfile.write(data)
-            except Exception as err:  # Catch any Redis-related errors
-                self.send_response(500)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"message": f"Error: {str(err)}"}).encode())
                 
-        elif self.path == '/some-protected-endpoint':
-        # Get the session ID from the cookie
-            cookie_header = self.headers.get('Cookie')
-            if not cookie_header or 'session_id' not in cookie_header:
-                self.send_response(401)
-                self.end_headers()
-                return
+            elif self.path == '/some-protected-endpoint':
+            # Get the session ID from the cookie
+                cookie_header = self.headers.get('Cookie')
+                if not cookie_header or 'session_id' not in cookie_header:
+                    self.send_response(401)
+                    self.end_headers()
+                    return
 
-            session_id = cookie_header.split('=')[1]
-            if session_id not in SESSION_STORE:
-                self.send_response(401)
-                self.end_headers()
-                return
+                session_id = cookie_header.split('=')[1]
+                if session_id not in SESSION_STORE:
+                    self.send_response(401)
+                    self.end_headers()
+                    return
             
-        elif self.path == '/get-tables':
-            try:
+            elif self.path == '/get-tables':
                 # Fetch all table keys. Assuming each table is stored as 'table:<id>'
                 table_keys = conn.keys('table:*')
 
                 tables = []
                 for key in table_keys:
+                    table_id = key.decode().split(':')[1]  # Extract table ID from key
                     table_data = conn.hgetall(key)
-                    # Convert the data from bytes to a proper format
                     formatted_table_data = {field.decode(): value.decode() for field, value in table_data.items()}
+                    formatted_table_data['TableID'] = table_id  # Add the table ID to the data
                     tables.append(formatted_table_data)
 
                 # Send the response
@@ -234,11 +249,13 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps(tables).encode())
-            except Exception as err:  # Catch any Redis-related errors
+        except Exception as err:  # Catch any Redis-related errors
                 self.send_response(500)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"message": f"Error: {str(err)}"}).encode())
+        finally:
+            conn.close()
         
     def do_OPTIONS(self):
             self.send_response(200) 
