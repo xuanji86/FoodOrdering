@@ -8,29 +8,31 @@ function startOrder() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ tableID: tableNumber })
+            body: JSON.stringify({tableID: tableNumber})
         })
             .then(response => response.json())
             .then(data => {
                 if (data.hasOwnProperty("isEmpty")) {
                     if (data.isEmpty) {
                         // If table exists and is empty, show the menu and ordering options
-                        alert("welcom!")
+                        showAlert("welcom!")
+                        setTimeout(function () {
+                            window.location.href = '/order.html?TableID=' + tableNumber;
+                        }, 500);
                         //showMenu();
-                        window.location.href = '/order.html?TableID=' + tableNumber
                     } else {
-                        alert('Table is already occupied.');
+                        showAlert('Table is already occupied.');
                     }
                 } else {
-                    alert('Table does not exist.');
+                    showAlert('Table does not exist.');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred. Please try again.');
+                showAlert('An error occurred. Please try again.');
             });
     } else {
-        alert('Please enter a table number.');
+        showAlert('Please enter a table number.');
     }
 }
 
@@ -52,7 +54,7 @@ function startOrder() {
 //         })
 //         .catch(error => {
 //             console.error('Error:', error);
-//             alert('An error occurred. Please try again.');
+//             showAlert('An error occurred. Please try again.');
 //         });
 // }
 
@@ -63,3 +65,18 @@ function startOrder() {
 // function placeOrder() {
 
 // }
+function showAlert(text) {
+    // 获取弹窗元素
+    var alertBox = document.getElementById("myAlert");
+
+    // 设置弹窗文本
+    alertBox.innerHTML = text;
+
+    // 显示弹窗
+    alertBox.style.display = "block";
+
+    // 3秒后自动关闭弹窗
+    setTimeout(function () {
+        alertBox.style.display = "none";
+    }, 3000);
+}
