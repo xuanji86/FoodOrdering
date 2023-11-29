@@ -3,7 +3,7 @@ let cart = [];
 function startOrder() {
     const tableNumber = document.getElementById('table-number').value;
     if (tableNumber) {
-        fetch('http://127.0.0.1:8080/check-table', {
+        fetch('http://13.57.108.72:8080/check-table', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
