@@ -54,7 +54,7 @@ function login() {
         .then(response => response.json())
         .then(data => {
             if (data.message === 'Logged in successfully!') {
-                alert('Logged in successfully!');
+                showAlert('Logged in successfully!');
                 document.getElementById('login-form').style.display = 'none';
 
                 // Set the cookie for the logged-in user
@@ -65,13 +65,13 @@ function login() {
                 // adminButton.innerText = username;
                 checkLoginStatus();
             } else {
-                alert('Invalid credentials!');
+                showAlert('Invalid credentials!');
                 console.log(data.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred. Please try again.');
+            showAlert('An error occurred. Please try again.');
         });
 }
 
@@ -87,3 +87,4 @@ function logout() {
 
 
 window.onload = checkLoginStatus;
+
