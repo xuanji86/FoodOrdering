@@ -5,6 +5,7 @@ import sys
 import threading
 import uuid
 import certifi
+import ssl
 from datetime import datetime
 from urllib.parse import parse_qs
 from pymongo.errors import ConnectionFailure
@@ -13,7 +14,7 @@ from pymongo.errors import ConnectionFailure
 import redis
 from pymongo import MongoClient
 
-PORT = 8080
+PORT = 443
 SESSION_STORE = {}
 
 
@@ -377,7 +378,7 @@ server_thread = threading.Thread(target=serve)
 server_thread.start()
 
 print(f"Serving at port {PORT}. Press Ctrl+C to stop.")
-
+  
 try:
     server_thread.join()
 except KeyboardInterrupt:
@@ -385,5 +386,20 @@ except KeyboardInterrupt:
     is_serving = False
     httpd.server_close()
     sys.exit(0)
+    
+if __name__ == "__main__":
+    server_address = ('', PORT)
+    httpd = http.server.HTTPServer(server_address, MyHandler)
+
+    # 创建 SSL 上下文
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain('etc/letsencrypt/live/anjixu.com/cert.pem ', 'etc/letsencrypt/live/anjixu.com/privkey.pem')  # 替换为您的证书和私钥文件路径
+
+    # 包装 HTTP 服务器 socket 以使用 SSL
+    httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
+
+    print(f"Starting https server on port {PORT}")
+    httpd.serve_forever()
+  
 
 
