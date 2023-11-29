@@ -1,5 +1,5 @@
 function loadTables() {
-    fetch('https://13.57.108.72:8080/get-tables')
+    fetch('http://13.57.108.72:8080/get-tables')
         .then(response => response.json())
         .then(table => {
             if (!Array.isArray(table)) {
@@ -62,7 +62,7 @@ function loadTables() {
 }
 
 function deleteItem(itemName) {
-    fetch('https://13.57.108.72:8080/delete-item', {
+    fetch('http://13.57.108.72:8080/delete-item', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -77,7 +77,7 @@ function deleteItem(itemName) {
 }
 
 function removeTable(tableID) {
-    fetch('https://13.57.108.72:8080/remove-table', {
+    fetch('http://13.57.108.72:8080/remove-table', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -94,7 +94,7 @@ function removeTable(tableID) {
 var table_id = ''
 
 function showTable(tableID) {
-    fetch('https://13.57.108.72:8080/show-table/' + tableID)
+    fetch('http://13.57.108.72:8080/show-table/' + tableID)
         .then(response => response.json())
         .then(orderData => {
             // Access the HTML elements
@@ -147,7 +147,7 @@ function showTable(tableID) {
 
 
 function addTable() {
-    fetch('https://13.57.108.72:8080/add-table', {
+    fetch('http://13.57.108.72:8080/add-table', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -173,7 +173,7 @@ function addItem() {
         return;  // Exit the function if validation fails
     }
 
-    fetch('https://13.57.108.72:8080/add-item', {
+    fetch('http://13.57.108.72:8080/add-item', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -187,7 +187,7 @@ function addItem() {
 }
 
 function showMenu() {
-    fetch('https://13.57.108.72:8080/get-menu')
+    fetch('http://13.57.108.72:8080/get-menu')
         .then(response => response.json())
         .then(menu => {
 
