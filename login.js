@@ -44,7 +44,7 @@ function login() {
     const password = document.getElementById('password').value;
 
     // Send a POST request to the backend
-    fetch('http://13.57.108.72:8080/admin/login', {
+    fetch('https://13.57.108.72:8080/admin/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
