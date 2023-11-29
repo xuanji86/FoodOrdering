@@ -368,7 +368,10 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 httpd = socketserver.TCPServer(("", PORT), MyHandler)
 is_serving = True
 
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+context.load_cert_chain('etc/letsencrypt/live/anjixu.com/fullchain.pem ', 'etc/letsencrypt/live/anjixu.com/privkey.pem')  
 
+httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 def serve():
     while is_serving:
         httpd.handle_request()
@@ -387,19 +390,19 @@ except KeyboardInterrupt:
     httpd.server_close()
     sys.exit(0)
     
-if __name__ == "__main__":
-    server_address = ('', PORT)
-    httpd = http.server.HTTPServer(server_address, MyHandler)
+# if __name__ == "__main__":
+#     server_address = ('', PORT)
+#     httpd = http.server.HTTPServer(server_address, MyHandler)
 
-    # 创建 SSL 上下文
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    context.load_cert_chain('etc/letsencrypt/live/anjixu.com/cert.pem ', 'etc/letsencrypt/live/anjixu.com/privkey.pem')  # 替换为您的证书和私钥文件路径
+#     # 创建 SSL 上下文
+#     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+#     context.load_cert_chain('etc/letsencrypt/live/anjixu.com/cert.pem ', 'etc/letsencrypt/live/anjixu.com/privkey.pem')  # 替换为您的证书和私钥文件路径
 
-    # 包装 HTTP 服务器 socket 以使用 SSL
-    httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
+#     # 包装 HTTP 服务器 socket 以使用 SSL
+#     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
-    print(f"Starting https server on port {PORT}")
-    httpd.serve_forever()
+#     print(f"Starting https server on port {PORT}")
+#     httpd.serve_forever()
   
 
 
