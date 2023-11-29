@@ -3,7 +3,7 @@ let cart = [];
 function startOrder() {
     const tableNumber = document.getElementById('table-number').value;
     if (tableNumber) {
-        fetch('https://anjixu.com:8080/check-table', {
+        fetch('https://anjixu.com:8443/check-table', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

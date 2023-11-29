@@ -1,5 +1,5 @@
 function loadTables() {
-    fetch('https://anjixu.com:8080/get-tables')
+    fetch('https://anjixu.com:8443/get-tables')
         .then(response => response.json())
         .then(table => {
             if (!Array.isArray(table)) {
@@ -62,7 +62,7 @@ function loadTables() {
 }
 
 function deleteItem(itemName) {
-    fetch('https://anjixu.com:8080/delete-item', {
+    fetch('https://anjixu.com:8443/delete-item', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -77,7 +77,7 @@ function deleteItem(itemName) {
 }
 
 function removeTable(tableID) {
-    fetch('https://anjixu.com:8080/remove-table', {
+    fetch('https://anjixu.com:8443/remove-table', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -94,7 +94,7 @@ function removeTable(tableID) {
 var table_id = ''
 
 function showTable(tableID) {
-    fetch('https://anjixu.com:8080/show-table/' + tableID)
+    fetch('https://anjixu.com:8443/show-table/' + tableID)
         .then(response => response.json())
         .then(orderData => {
             // Access the HTML elements
@@ -116,7 +116,7 @@ function showTable(tableID) {
             CleanButton.addEventListener('click', () => {
                 console.log(table_id)
                 // sent POST
-                fetch('https://anjixu.com:8080/Clean', {
+                fetch('https://anjixu.com:8443/Clean', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ function showTable(tableID) {
 
 
 function addTable() {
-    fetch('https://anjixu.com:8080/add-table', {
+    fetch('https://anjixu.com:8443/add-table', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -173,7 +173,7 @@ function addItem() {
         return;  // Exit the function if validation fails
     }
 
-    fetch('https://anjixu.com:8080/add-item', {
+    fetch('https://anjixu.com:8443/add-item', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -187,7 +187,7 @@ function addItem() {
 }
 
 function showMenu() {
-    fetch('https://anjixu.com:8080/get-menu')
+    fetch('https://anjixu.com:8443/get-menu')
         .then(response => response.json())
         .then(menu => {
 

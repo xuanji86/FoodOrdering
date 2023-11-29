@@ -20,7 +20,7 @@ function removeCartItem(cartItem, index) {
 
 
 function showMenu() {
-    fetch('https://anjixu.com:8080/get-menu')
+    fetch('https://anjixu.com:8443/get-menu')
         .then(response => response.json())
         .then(menu => {
 
@@ -126,7 +126,7 @@ placeOrderButton.addEventListener('click', () => {
 
     console.log(shoppingCart)
     // sent POST
-    fetch('https://anjixu.com:8080/place-order', {
+    fetch('https://anjixu.com:8443/place-order', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ checkoutButton.addEventListener('click', () => {
     };
 
     // send data to the backend using Fetch API
-    fetch('http://13.57.108.72:8080/Checkout', {
+    fetch('http://anjixu.com:8443/Checkout', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
