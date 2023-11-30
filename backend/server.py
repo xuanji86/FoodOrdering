@@ -3,13 +3,12 @@ import json
 import socketserver
 import sys
 import threading
+import traceback
 import uuid
 import certifi
 import ssl
-from datetime import datetime
 from urllib.parse import parse_qs
 from pymongo.errors import ConnectionFailure
-
 
 import redis
 from pymongo import MongoClient
@@ -29,7 +28,7 @@ def get_redis_connection():
 def get_mongo_connection():
     try:
         connection_string = "mongodb+srv://penny:Woxihuanni99@foodordering.nkxfsti.mongodb.net/?retryWrites=true&w=majority"
-        client = MongoClient(connection_string,tlsCAFile=certifi.where())
+        client = MongoClient(connection_string, tlsCAFile=certifi.where())
         return client
     except ConnectionFailure as e:
         print(f"MongoDB connection error: {str(e)}")
@@ -229,8 +228,8 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 print(data)
                 data['_id'] = data['OrderID']
                 mongodb = conn_mongo['order']['order']
-                result = mongodb.insert_one(data)
-                print(f"Inserted document with ID: {result.inserted_id}")
+                result = mongodb.update_one({'_id': data['_id']}, {"$set": data}, upsert=True)
+                print(f"Inserted document with ID: {result.upserted_id}")
                 new_data = conn.hset(f'table:{data["tableID"]}', 'IsEmpty', '0')
                 print(new_data)
                 # 响应客户端
@@ -252,7 +251,8 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                     data_list.append({
                         'ItemID': dt.get('id'),
                         'OrderID': OrderID,
-                        'Quantity': 1,
+                        'Name': dt.get('name'),
+                        'Num': dt.get('num'),
                         'Subtotal': dt.get('price')}
                     )
 
@@ -306,10 +306,9 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 conn = get_mongo_connection()
                 data = conn['order']['order']
                 table_info = data.find_one({'tableID': table_id})
-
                 # Convert the ObjectId to str for JSON serialization
-                table_info['_id'] = str(table_info['_id'])
-
+                if table_info is not None:
+                    table_info['_id'] = str(table_info['_id'])
                 # Send the response
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
@@ -353,6 +352,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps(tables).encode())
         except Exception as err:  # Catch any Redis-related errors
+            traceback.print_exc()
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
@@ -368,8 +368,9 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 httpd = socketserver.TCPServer(("", PORT), MyHandler)
 is_serving = True
 
+
 context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-context.load_cert_chain('/etc/letsencrypt/live/anjixu.com/fullchain.pem', '/etc/letsencrypt/live/anjixu.com/privkey.pem')  
+context.load_cert_chain('/etc/letsencrypt/live/anjixu.com/fullchain.pem', '/etc/letsencrypt/live/anjixu.com/privkey.pem')
 
 httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 def serve():
@@ -381,7 +382,7 @@ server_thread = threading.Thread(target=serve)
 server_thread.start()
 
 print(f"Serving at port {PORT}. Press Ctrl+C to stop.")
-  
+
 try:
     server_thread.join()
 except KeyboardInterrupt:
@@ -389,20 +390,4 @@ except KeyboardInterrupt:
     is_serving = False
     httpd.server_close()
     sys.exit(0)
-    
-# if __name__ == "__main__":
-#     server_address = ('', PORT)
-#     httpd = http.server.HTTPServer(server_address, MyHandler)
-
-#     # 创建 SSL 上下文
-#     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-#     context.load_cert_chain('etc/letsencrypt/live/anjixu.com/cert.pem ', 'etc/letsencrypt/live/anjixu.com/privkey.pem')  # 替换为您的证书和私钥文件路径
-
-#     # 包装 HTTP 服务器 socket 以使用 SSL
-#     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
-
-#     print(f"Starting https server on port {PORT}")
-#     httpd.serve_forever()
-  
-
 
