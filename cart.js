@@ -20,7 +20,7 @@ function removeCartItem(cartItem, index) {
 
 
 function showMenu() {
-    fetch('https://anjixu.com:8443/get-menu')
+    fetch(baseUrl + '/get-menu')
         .then(response => response.json())
         .then(menu => {
 
@@ -31,6 +31,10 @@ function showMenu() {
 
             // Get the cart container element
             const cartContainer = document.querySelector('.cart-items');
+            const cartItem = document.createElement('div');
+            cartItem.classList.add('item');
+            cartItem.innerHTML = `<span>Id</span> <span>Name</span> <span>Price</span><span>Num</span><span>Operator</span> `;
+            cartContainer.appendChild(cartItem)
 
             //Get the total element
             const totalElement = document.getElementById('cart-total');
@@ -55,15 +59,27 @@ function showMenu() {
                 const addButton = document.createElement('button');
                 addButton.textContent = 'add';
                 addButton.addEventListener('click', () => {
-                    // Add the selected dish to the cart data structure
-                    shoppingCart.push({id: dishId, name: dishName, price: dishPrice});
+                    // Add the selected dish to the cart data structurei
+                    const find = shoppingCart.find(item => item.id === dishId);
+                    let num = 1;
+                    if (find) {
+                        find.num = find.num + 1;
+                        find.price = find.price + dishPrice
+                        num = find.num
+                    } else {
+                        shoppingCart.push({id: dishId, name: dishName, num: num, price: dishPrice});
+                    }
 
                     // Update the cart's DOM elements
+                    if (find) {
+                        const cartItem = document.getElementById(`disId${dishId}`);
+                        cartContainer.removeChild(cartItem)
+                    }
                     const cartItem = document.createElement('div');
                     cartItem.classList.add('item');
-                    cartItem.innerHTML = `<span>${dishId}</span> <span>${dishName}</span> <span>${dishPrice}</span> <button class="remove-button">remove</button>`;
+                    cartItem.setAttribute("id", `disId${dishId}`)
+                    cartItem.innerHTML = `<span>${dishId}</span> <span>${dishName}</span> <span>${dishPrice}</span><span>${num}</span> <button class="remove-button">remove</button>`;
                     cartContainer.appendChild(cartItem);
-
                     // Calculate the total amount and update the display
                     totalAmount += parseFloat(dishPrice);
                     updateCartTotal();
@@ -71,7 +87,7 @@ function showMenu() {
                     // Add a click event for the "Remove" button
                     const removeButton = cartItem.querySelector('.remove-button');
                     removeButton.addEventListener('click', () => {
-                        removeCartItem(cartItem, shoppingCart.length - 1);
+                        removeCartItem(cartItem, shoppingCart.findIndex(item => item.id === dishId));
                     });
                 });
 
@@ -126,7 +142,7 @@ placeOrderButton.addEventListener('click', () => {
 
     console.log(shoppingCart)
     // sent POST
-    fetch('https://anjixu.com:8443/place-order', {
+    fetch(baseUrl + '/place-order', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -164,7 +180,7 @@ checkoutButton.addEventListener('click', () => {
     };
 
     // send data to the backend using Fetch API
-    fetch('http://anjixu.com:8443/Checkout', {
+    fetch(baseUrl+'/Checkout', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -59,14 +59,19 @@
         <h2>Manager dashboard</h2>
         <div class="containerp" style="display: flex">
             <div class="table">
-                <h2>Table</h2>
+                <div class="table-header">
+                    <h2>Table</h2>
+                    <button onclick="refreshTable()">Refresh</button>
+                </div>
                 <div id="table">
                 </div>
-                <button style="width:111px; float: inline-end; margin-right: 10px;" onclick="addTable()">Add Table</button>
+                <button style="width:111px; float: inline-end; margin-right: 10px;" onclick="addTable()">Add Table
+                </button>
             </div>
             <div class="menu">
                 <h2>Menu</h2>
-                <div id="add-item" style="display: flex; align-items: center; justify-content: space-between;margin-top: -10px">
+                <div id="add-item"
+                     style="display: flex; align-items: center; justify-content: space-between;margin-top: -10px">
                     <input type="text" id="new-item-name" placeholder="New Item Name">
                     <input type="number" id="new-item-price" placeholder="Price" style="width: 75px;margin: 0 10px">
                     <button onclick="addItem()" style="margin-left: 0px; padding: 10px">Add Item</button>
@@ -101,10 +106,10 @@
 </main>
 <!-- 弹窗元素 -->
 <div id="myAlert"></div>
+<script src="env.js"></script>
 <script src="cookies.js"></script>
 <script src="login.js"></script>
 <script src="menu.js"></script>
-<script src="main.js"></script>
 <script src="manager.js"></script>
 </body>
 

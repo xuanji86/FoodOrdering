@@ -16,6 +16,7 @@ function checkLoginStatus() {
 
     dropdownContent.classList.add('hidden');
 
+    console.log(username)
     if (username) {
         adminButton.innerText = username;
         adminButton.onclick = toggleDropdown;
@@ -44,7 +45,7 @@ function login() {
     const password = document.getElementById('password').value;
 
     // Send a POST request to the backend
-    fetch('https://anjixu.com:8443/admin/login', {
+    fetch(baseUrl+'/admin/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -85,6 +86,9 @@ function logout() {
     checkLoginStatus();  // 调用这个函数来更新页面内容
 }
 
+function initializeApp() {
+    checkLoginStatus();
+}
 
-window.onload = checkLoginStatus;
+window.onload = initializeApp;
 

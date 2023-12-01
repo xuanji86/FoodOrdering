@@ -1,9 +1,7 @@
-let cart = [];
-
 function startOrder() {
     const tableNumber = document.getElementById('table-number').value;
     if (tableNumber) {
-        fetch('https://anjixu.com:8443/check-table', {
+        fetch(baseUrl + '/check-table', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -17,7 +15,9 @@ function startOrder() {
                         // If table exists and is empty, show the menu and ordering options
                         showAlert("welcom!")
                         setTimeout(function () {
-                            window.location.href = '/order.html?TableID=' + tableNumber;
+                            // window.location.href = '/order.html?TableID=' + tableNumber;
+                            // createWindow('/order.html?TableID=' + tableNumber)
+                            window.electronAPI.openOrder(tableNumber)
                         }, 500);
                         //showMenu();
                     } else {
