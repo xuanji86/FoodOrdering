@@ -15,9 +15,13 @@ function startOrder() {
                         // If table exists and is empty, show the menu and ordering options
                         showAlert("welcom!")
                         setTimeout(function () {
-                            // window.location.href = '/order.html?TableID=' + tableNumber;
-                            // createWindow('/order.html?TableID=' + tableNumber)
-                            window.electronAPI.openOrder(tableNumber)
+                            if (window.electronAPI) {
+                                window.electronAPI.openOrder(tableNumber)
+                            }else{
+                                window.location.href = '/order.html?TableID=' + tableNumber;
+                                // createWindow('/order.html?TableID=' + tableNumber)
+                            }
+                           
                         }, 500);
                         //showMenu();
                     } else {
