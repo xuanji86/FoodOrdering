@@ -9,30 +9,30 @@
 </head>
 
 <body>
-<header>
-    <h1>Restaurant Name</h1>
-    <div class="admin-login">
-        <div class="admin-dropdown">
-            <button id="admin-button" onclick="toggleDropdown()">Admin Login</button>
-            <div id="dropdown-content" class="dropdown-content">
-                <button onclick="logout()">Logout</button>
+    <header>
+        <h1>Restaurant Name</h1>
+        <div class="admin-login">
+            <div class="admin-dropdown">
+                <button id="admin-button" onclick="toggleDropdown()">Admin Login</button>
+                <div id="dropdown-content" class="dropdown-content">
+                    <button onclick="logout()">Logout</button>
+                </div>
+            </div>
+            <div id="login-form" class="hidden">
+                <input type="text" id="username" placeholder="Username">
+                <input type="password" id="password" placeholder="Password">
+                <button onclick="login()">Login</button>
             </div>
         </div>
-        <div id="login-form" class="hidden">
-            <input type="text" id="username" placeholder="Username">
-            <input type="password" id="password" placeholder="Password">
-            <button onclick="login()">Login</button>
+    </header>
+    <main>
+        <div class="order-section" id="start-ordering">
+            <h2>Start Ordering</h2>
+            <input type="text" id="table-number" placeholder="Enter Table Number">
+            <button onclick="startOrder()">Order</button>
         </div>
-    </div>
-</header>
-<main>
-    <div class="order-section" id="start-ordering">
-        <h2>Start Ordering</h2>
-        <input type="text" id="table-number" placeholder="Enter Table Number">
-        <button onclick="startOrder()">Order</button>
-    </div>
 
-    <!--
+        <!--
      <div class="manager-section" id="manager-section" class="hidden">
         <div class="tab-nav">
             <button class="tab-button" onclick="showTab('table-section')">Table</button>
@@ -55,62 +55,62 @@
         </div>
     </div>
      -->
-    <div class="manager-section" id="manager-section" class="hidden">
-        <h2>Manager dashboard</h2>
-        <div class="containerp" style="display: flex">
-            <div class="table">
-                <div class="table-header">
-                    <h2>Table</h2>
-                    <button onclick="refreshTable()">Refresh</button>
+        <div class="manager-section" id="manager-section" class="hidden">
+            <h2>Manager dashboard</h2>
+            <div class="containerp" style="display: flex">
+                <div class="table">
+                    <div class="table-header">
+                        <h2>Table</h2>
+                        <button onclick="refreshTable()">Refresh</button>
+                    </div>
+                    <div id="table">
+                    </div>
+                    <button style="width:111px; float: inline-end; margin-right: 10px;" onclick="addTable()">Add Table
+                    </button>
                 </div>
-                <div id="table">
+                <div class="menu">
+                    <h2>Menu</h2>
+                    <div id="add-item"
+                        style="display: flex; align-items: center; justify-content: space-between;margin-top: -10px">
+                        <input type="text" id="new-item-name" placeholder="New Item Name">
+                        <input type="number" id="new-item-price" placeholder="Price" style="width: 75px;margin: 0 10px">
+                        <button onclick="addItem()" style="margin-left: 0px; padding: 10px">Add Item</button>
+                        <div id="error-message" style="color: red;"></div>
+                    </div>
                 </div>
-                <button style="width:111px; float: inline-end; margin-right: 10px;" onclick="addTable()">Add Table
-                </button>
+                <div class="order">
+                    <h2>Order</h2>
+                    <div class="Order-items">
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <div class="containerp" style="display: none">
             <div class="menu">
                 <h2>Menu</h2>
-                <div id="add-item"
-                     style="display: flex; align-items: center; justify-content: space-between;margin-top: -10px">
-                    <input type="text" id="new-item-name" placeholder="New Item Name">
-                    <input type="number" id="new-item-price" placeholder="Price" style="width: 75px;margin: 0 10px">
-                    <button onclick="addItem()" style="margin-left: 0px; padding: 10px">Add Item</button>
-                    <div id="error-message" style="color: red;"></div>
+                <!-- 在此添加更多菜单项 -->
+            </div>
+
+            <div class="cart">
+                <h2>Cart</h2>
+                <div class="cart-items">
+                    <!-- 在此添加更多购物车项 -->
+                </div>
+                <div style="margin-top: 10px">
+                    <button id="place-order-button">Place Order</button>
+                    <button id="checkout-button">Checkout</button>
                 </div>
             </div>
-            <div class="order">
-                <h2>Order</h2>
-                <div class="Order-items">
-                </div>
-            </div>
         </div>
-    </div>
-
-    <div class="containerp" style="display: none">
-        <div class="menu">
-            <h2>Menu</h2>
-            <!-- 在此添加更多菜单项 -->
-        </div>
-
-        <div class="cart">
-            <h2>Cart</h2>
-            <div class="cart-items">
-                <!-- 在此添加更多购物车项 -->
-            </div>
-            <div style="margin-top: 10px">
-                <button id="place-order-button">Place Order</button>
-                <button id="checkout-button">Checkout</button>
-            </div>
-        </div>
-    </div>
-</main>
-<!-- 弹窗元素 -->
-<div id="myAlert"></div>
-<script src="env.js"></script>
-<script src="cookies.js"></script>
-<script src="login.js"></script>
-<script src="menu.js"></script>
-<script src="manager.js"></script>
+    </main>
+    <!-- 弹窗元素 -->
+    <div id="myAlert"></div>
+    <script src="env.js"></script>
+    <script src="cookies.js"></script>
+    <script src="login.js"></script>
+    <script src="menu.js"></script>
+    <script src="manager.js"></script>
 </body>
 
 </html>
