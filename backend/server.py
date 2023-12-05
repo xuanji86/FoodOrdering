@@ -261,7 +261,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 result = mongodb.insert_many(data_list)
                 print(data)
                 print(f"Inserted {len(result.inserted_ids)} documents with IDs: {result.inserted_ids}")
-                # 响应客户端
+                # responce to Client
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
@@ -391,16 +391,3 @@ except KeyboardInterrupt:
     httpd.server_close()
     sys.exit(0)
 
-# if __name__ == "__main__":
-#     server_address = ('', PORT)
-#     httpd = http.server.HTTPServer(server_address, MyHandler)
-
-#     # 创建 SSL 上下文
-#     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-#     context.load_cert_chain('etc/letsencrypt/live/anjixu.com/cert.pem ', 'etc/letsencrypt/live/anjixu.com/privkey.pem')  # 替换为您的证书和私钥文件路径
-
-#     # 包装 HTTP 服务器 socket 以使用 SSL
-#     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
-
-#     print(f"Starting https server on port {PORT}")
-#     httpd.serve_forever()

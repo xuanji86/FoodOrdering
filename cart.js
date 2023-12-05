@@ -67,7 +67,7 @@ function showMenu() {
                         find.price = find.price + dishPrice
                         num = find.num
                     } else {
-                        shoppingCart.push({id: dishId, name: dishName, num: num, price: dishPrice});
+                        shoppingCart.push({ id: dishId, name: dishName, num: num, price: dishPrice });
                     }
 
                     // Update the cart's DOM elements
@@ -180,7 +180,7 @@ checkoutButton.addEventListener('click', () => {
     };
 
     // send data to the backend using Fetch API
-    fetch(baseUrl+'/Checkout', {
+    fetch(baseUrl + '/Checkout', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ checkoutButton.addEventListener('click', () => {
         })
         .then(data => {
             // handle successful response from the backend
-            // 显示购物车内容和总价格
+            // show the price in shooping cart
             const cartContents = shoppingCart.map(item => `${item.name} - ${item.price}`).join('\n');
             showAlert(`Your Order:\n${cartContents}\nTotal Amount: $${totalAmount.toFixed(2)}`);
             shoppingCart.length = 0; // clean shopping cart
@@ -212,16 +212,16 @@ showMenu()
 
 
 function showAlert(text) {
-    // 获取弹窗元素
+    // get alert 
     var alertBox = document.getElementById("myAlert");
 
-    // 设置弹窗文本
+    // set alert
     alertBox.innerHTML = text;
 
-    // 显示弹窗
+    // show alert
     alertBox.style.display = "block";
 
-    // 3秒后自动关闭弹窗
+    // close alert after 3 second
     setTimeout(function () {
         alertBox.style.display = "none";
     }, 3000);

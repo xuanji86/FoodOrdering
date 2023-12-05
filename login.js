@@ -45,7 +45,7 @@ function login() {
     const password = document.getElementById('password').value;
 
     // Send a POST request to the backend
-    fetch(baseUrl+'/admin/login', {
+    fetch(baseUrl + '/admin/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -83,7 +83,7 @@ function logout() {
     adminButton.onclick = showLogin;
     const dropdownContent = document.getElementById('dropdown-content');
     dropdownContent.classList.add('hidden');
-    checkLoginStatus();  // 调用这个函数来更新页面内容
+    checkLoginStatus();
 }
 
 function initializeApp() {
