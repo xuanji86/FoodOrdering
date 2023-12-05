@@ -1,4 +1,3 @@
-
 const shoppingCart = [];
 let totalAmount = 0;
 
@@ -21,7 +20,7 @@ function removeCartItem(cartItem, index) {
 
 
 function showMenu() {
-    fetch('http://127.0.0.1:8080/get-menu')
+    fetch(baseUrl + '/get-menu')
         .then(response => response.json())
         .then(menu => {
 
@@ -32,15 +31,17 @@ function showMenu() {
 
             // Get the cart container element
             const cartContainer = document.querySelector('.cart-items');
+            const cartItem = document.createElement('div');
+            cartItem.classList.add('item');
+            cartItem.innerHTML = `<span>Id</span> <span>Name</span> <span>Price</span><span>Num</span><span>Operator</span> `;
+            cartContainer.appendChild(cartItem)
 
             //Get the total element
             const totalElement = document.getElementById('cart-total');
 
             // Display the menu and allow users to add dishes to the cart
-            menu.forEach(dishData => {
-                const dishId = dishData[0];
-                const dishName = dishData[1];
-                const dishPrice = dishData[2];
+            Object.entries(menu).forEach(([dishName, dishPrice], index = 0) => {
+                const dishId = index + 1;
 
                 // Create a menu item div
                 const menuItem = document.createElement('div');
@@ -58,15 +59,27 @@ function showMenu() {
                 const addButton = document.createElement('button');
                 addButton.textContent = 'add';
                 addButton.addEventListener('click', () => {
-                    // Add the selected dish to the cart data structure
-                    shoppingCart.push({ id: dishId, name: dishName, price: dishPrice });
+                    // Add the selected dish to the cart data structurei
+                    const find = shoppingCart.find(item => item.id === dishId);
+                    let num = 1;
+                    if (find) {
+                        find.num = find.num + 1;
+                        find.price = find.price + dishPrice
+                        num = find.num
+                    } else {
+                        shoppingCart.push({ id: dishId, name: dishName, num: num, price: dishPrice });
+                    }
 
                     // Update the cart's DOM elements
+                    if (find) {
+                        const cartItem = document.getElementById(`disId${dishId}`);
+                        cartContainer.removeChild(cartItem)
+                    }
                     const cartItem = document.createElement('div');
                     cartItem.classList.add('item');
-                    cartItem.innerHTML = `<span>${dishId}</span> <span>${dishName}</span> <span>${dishPrice}</span> <button class="remove-button">remove</button>`;
+                    cartItem.setAttribute("id", `disId${dishId}`)
+                    cartItem.innerHTML = `<span>${dishId}</span> <span>${dishName}</span> <span>${dishPrice}</span><span>${num}</span> <button class="remove-button">remove</button>`;
                     cartContainer.appendChild(cartItem);
-
                     // Calculate the total amount and update the display
                     totalAmount += parseFloat(dishPrice);
                     updateCartTotal();
@@ -74,7 +87,7 @@ function showMenu() {
                     // Add a click event for the "Remove" button
                     const removeButton = cartItem.querySelector('.remove-button');
                     removeButton.addEventListener('click', () => {
-                        removeCartItem(cartItem, shoppingCart.length - 1);
+                        removeCartItem(cartItem, shoppingCart.findIndex(item => item.id === dishId));
                     });
                 });
 
@@ -91,7 +104,7 @@ function showMenu() {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred. Please try again.');
+            showAlert('An error occurred. Please try again.');
         });
 }
 
@@ -99,6 +112,8 @@ function showMenu() {
 const placeOrderButton = document.querySelector('#place-order-button');
 const checkoutButton = document.querySelector('#checkout-button');
 
+
+var OrderID = `${new URLSearchParams(new URL(window.location.href).search).get('TableID')}_${Date.now()}`;
 // Place Order 
 placeOrderButton.addEventListener('click', () => {
     // get Current Time
@@ -109,18 +124,25 @@ placeOrderButton.addEventListener('click', () => {
     const params = new URLSearchParams(url.search);
     // Get "TableID" value
     const tableID = params.get('TableID');
+    let totalAmount = 0;
+    shoppingCart.forEach(item => {
+        totalAmount += item.price;
+    });
 
     console.log(tableID); // output value
     // sent the shopping cart and current time to backend.
     const data = {
+        OrderID: OrderID,
         tableID: tableID,
+        OrderDate: currentTime,
+        totalAmount: totalAmount.toFixed(2),
+        OrderStatus: 'In Process',
         cartContents: shoppingCart,
-        currentTime: currentTime,
     };
 
     console.log(shoppingCart)
     // sent POST
-    fetch('http://127.0.0.1:8080/place-order', {
+    fetch(baseUrl + '/place-order', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -130,15 +152,15 @@ placeOrderButton.addEventListener('click', () => {
         .then(response => {
             if (response.ok) {
                 // Order placed successfully
-                alert('Order placed successfully!');
+                showAlert('Order placed successfully!');
 
             } else {
-                alert('Failed to place the order. Please try again.');
+                showAlert('Failed to place the order. Please try again.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while placing the order.');
+            showAlert('An error occurred while placing the order.');
         });
 });
 
@@ -150,14 +172,57 @@ checkoutButton.addEventListener('click', () => {
         totalAmount += item.price;
     });
 
-    // show price
-    const cartContents = shoppingCart.map(item => `${item.name} - ${item.price}`).join('\n');
-    alert(`Your Order:\n${cartContents}\nTotal Amount: $${totalAmount.toFixed(2)}`);
-    window.location.href = 'index.html';
+    // prepare data to be sent to the backend
+    const orderData = {
+        cartContents: shoppingCart,
+        totalAmount: totalAmount.toFixed(2),
+        OrderID: OrderID,
+    };
 
-    shoppingCart.length = 0; // clean shoopinf cart
-
-
+    // send data to the backend using Fetch API
+    fetch(baseUrl + '/Checkout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // handle successful response from the backend
+            // show the price in shooping cart
+            const cartContents = shoppingCart.map(item => `${item.name} - ${item.price}`).join('\n');
+            showAlert(`Your Order:\n${cartContents}\nTotal Amount: $${totalAmount.toFixed(2)}`);
+            shoppingCart.length = 0; // clean shopping cart
+            window.location.reload()
+        })
+        .catch(error => {
+            // handle errors
+            console.error('Error:', error);
+        });
 });
 
+
 showMenu()
+
+
+function showAlert(text) {
+    // get alert 
+    var alertBox = document.getElementById("myAlert");
+
+    // set alert
+    alertBox.innerHTML = text;
+
+    // show alert
+    alertBox.style.display = "block";
+
+    // close alert after 3 second
+    setTimeout(function () {
+        alertBox.style.display = "none";
+    }, 3000);
+}

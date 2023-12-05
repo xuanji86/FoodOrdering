@@ -16,6 +16,7 @@ function checkLoginStatus() {
 
     dropdownContent.classList.add('hidden');
 
+    console.log(username)
     if (username) {
         adminButton.innerText = username;
         adminButton.onclick = toggleDropdown;
@@ -44,7 +45,7 @@ function login() {
     const password = document.getElementById('password').value;
 
     // Send a POST request to the backend
-    fetch('http://127.0.0.1:8080/admin/login', {
+    fetch(baseUrl + '/admin/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -54,7 +55,7 @@ function login() {
         .then(response => response.json())
         .then(data => {
             if (data.message === 'Logged in successfully!') {
-                alert('Logged in successfully!');
+                showAlert('Logged in successfully!');
                 document.getElementById('login-form').style.display = 'none';
 
                 // Set the cookie for the logged-in user
@@ -65,13 +66,13 @@ function login() {
                 // adminButton.innerText = username;
                 checkLoginStatus();
             } else {
-                alert('Invalid credentials!');
+                showAlert('Invalid credentials!');
                 console.log(data.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred. Please try again.');
+            showAlert('An error occurred. Please try again.');
         });
 }
 
@@ -82,8 +83,12 @@ function logout() {
     adminButton.onclick = showLogin;
     const dropdownContent = document.getElementById('dropdown-content');
     dropdownContent.classList.add('hidden');
-    checkLoginStatus();  // 调用这个函数来更新页面内容
+    checkLoginStatus();
 }
 
+function initializeApp() {
+    checkLoginStatus();
+}
 
-window.onload = checkLoginStatus;
+window.onload = initializeApp;
+

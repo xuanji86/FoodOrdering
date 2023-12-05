@@ -1,18 +1,24 @@
 function loadTables() {
-    fetch('http://127.0.0.1:8080/get-tables')
+    fetch(baseUrl + '/get-tables')
         .then(response => response.json())
         .then(table => {
-
+            if (!Array.isArray(table)) {
+                console.error('Expected an array for table data, but received:', table);
+                return;
+            }
             const dpy = document.querySelector('.containerp');
 
             // Get the menu container element
-            const tableContainer = document.querySelector('.table');
+            const tableContainer = document.querySelector('#table');
 
-
+            // Sort the tables by TableID in ascending order
+            table.sort((a, b) => parseInt(a.TableID) - parseInt(b.TableID));
             // Display the menu and allow users to add dishes to the cart
             table.forEach(tableData => {
-                const tableId = tableData[0];
-                const tableStatus = tableData[1] ? "Occupied" : "Available";
+                const tableId = tableData.TableID;
+                const isTableEmpty = tableData.IsEmpty === '1';
+                const tableStatus = isTableEmpty ? "Available" : "Occupied";
+
 
                 // Create a table item div
                 const tableItem = document.createElement('div');
@@ -28,11 +34,16 @@ function loadTables() {
                 const removeButton = document.createElement('button');
                 removeButton.textContent = 'Remove';
                 removeButton.addEventListener('click', () => {
-                    removeTable(tableId);
-                }
+                        removeTable(tableId);
+                    }
                 );
                 const showOrderButton = document.createElement('button');
                 showOrderButton.textContent = 'Order Details';
+                showOrderButton.classList.add('table-btn');
+                showOrderButton.addEventListener('click', () => {
+                        showTable(tableId);
+                    }
+                );
 
                 // Append elements to the menu item div
                 tableItem.appendChild(tableIdElement);
@@ -50,13 +61,14 @@ function loadTables() {
         });
 }
 
-function deleteItem(itemID) {
-    fetch('http://127.0.0.1:8080/delete-item', {
+function deleteItem(itemName) {
+    fetch(baseUrl + '/delete-item', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ itemID: itemID })
+        body: JSON.stringify({itemName: itemName})
+
     }).then(response => {
         if (response.ok) {
             location.reload();  // Refresh the menu after deleting an item
@@ -65,31 +77,90 @@ function deleteItem(itemID) {
 }
 
 function removeTable(tableID) {
-    fetch('http://127.0.0.1:8080/remove-table', {
+    fetch(baseUrl + '/remove-table', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ tableID: tableID })
+        body: JSON.stringify({tableID: tableID})
     }).then(response => {
-        if (response.ok) {
-            location.reload();  // Refresh the menu after deleting an item
+            if (response.ok) {
+                location.reload();  // Refresh the menu after deleting an item
+            }
         }
-    }
     );
 }
+
+var table_id = ''
+
+function showTable(tableID) {
+    fetch(baseUrl + '/show-table/' + tableID)
+        .then(response => response.json())
+        .then(orderData => {
+            // Access the HTML elements
+            const orderContainer = document.querySelector('.Order-items');
+
+            // Update the content dynamically
+            orderContainer.innerHTML = `
+                <div class="menu">
+                     ${orderData.cartContents.map(item =>
+                `<div class="menu-item"><span>${item.id}</span><span>${item.name}</span><span>$${item.price}</span></div>`).join('')}
+                   
+                    <div style="display: flex; align-items: center; justify-content: space-between;">totalAmount: $${orderData.totalAmount}
+                    <button id="Clean">Clean</button>
+                    </div>
+                </div>`;
+            table_id = tableID
+            const CleanButton = document.querySelector('#Clean');
+            console.log(CleanButton)
+            CleanButton.addEventListener('click', () => {
+                console.log(table_id)
+                // sent POST
+                fetch(baseUrl + '/Clean', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(table_id),
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            // Order placed successfully
+                            showAlert('Clean successfully!');
+                            window.location.reload()
+
+                        } else {
+                            showAlert('Clean Error. Please try again.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('Clean Error. Please try again.');
+                    });
+            });
+
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+function refreshTable() {
+    location.reload();
+}
+
 function addTable() {
-    fetch('http://127.0.0.1:8080/add-table', {
+    fetch(baseUrl + '/add-table', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({})
     }).then(response => {
-        if (response.ok) {
-            location.reload();  // Refresh the menu after deleting an item
+            if (response.ok) {
+                location.reload();  // Refresh the menu after deleting an item
+            }
         }
-    }
     );
 }
 
@@ -97,21 +168,29 @@ function addTable() {
 function addItem() {
     const itemName = document.getElementById('new-item-name').value;
     const itemPrice = document.getElementById('new-item-price').value;
+    const errorMessageElement = document.getElementById('error-message');
 
-    fetch('http://127.0.0.1:8080/add-item', {
+    errorMessageElement.textContent = '';
+    if (!itemName.trim() || !itemPrice.trim()) {
+        errorMessageElement.textContent = "Invalid input.";
+        return;  // Exit the function if validation fails
+    }
+
+    fetch(baseUrl + '/add-item', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ itemName: itemName, price: itemPrice })
+        body: JSON.stringify({itemName: itemName, price: itemPrice})
     }).then(response => {
         if (response.ok) {
             location.reload();  // Refresh the menu after adding a new item
         }
     });
 }
+
 function showMenu() {
-    fetch('http://127.0.0.1:8080/get-menu')
+    fetch(baseUrl + '/get-menu')
         .then(response => response.json())
         .then(menu => {
 
@@ -122,16 +201,15 @@ function showMenu() {
 
 
             // Display the menu and allow users to add dishes to the cart
-            menu.forEach(dishData => {
-                const dishId = dishData[0];
-                const dishName = dishData[1];
-                const dishPrice = dishData[2];
+            Object.entries(menu).forEach(([dishName, dishPrice], index = 0) => {
+
+                const dishId = index + 1;
 
                 // Create a menu item div
                 const menuItem = document.createElement('div');
                 menuItem.classList.add('menu-item');
                 // Create elements for dish name, price, and add button
-                
+
                 const dishIdElement = document.createElement('span');
                 dishIdElement.textContent = dishId;
 
@@ -144,8 +222,8 @@ function showMenu() {
                 const removeButton = document.createElement('button');
                 removeButton.textContent = 'remove';
                 removeButton.addEventListener('click', () => {
-                    deleteItem(dishId);
-                }
+                        deleteItem(dishName);
+                    }
                 );
 
 
@@ -165,7 +243,9 @@ function showMenu() {
         });
 }
 
-
 showMenu();  // Call this function to populate the menu when the page loads
 loadTables();
+
+
+
 

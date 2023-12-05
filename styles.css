@@ -13,6 +13,12 @@ header {
     color: #fff;
 }
 
+.table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
 button {
     padding: 10px 15px;
     border: none;
@@ -153,6 +159,7 @@ input {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
+
 .table {
     flex: 1;
     border: 1px solid #ccc;
@@ -161,6 +168,7 @@ input {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
+
 .order {
     flex: 1;
     border: 1px solid #ccc;
@@ -185,7 +193,7 @@ input {
     margin-bottom: 10px;
 }
 
-.table-item{
+.table-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -206,3 +214,28 @@ input {
     margin-bottom: 10px;
 }
 
+#myAlert {
+    display: none;
+    padding: 15px;
+    background-color: #f44336;
+    color: white;
+    position: fixed;
+    /* 居中 */
+    left: 50%;
+    top: 10%;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+}
+
+
+.table-item span {
+    margin-right: 10px;
+}
+
+.table-item button {
+    margin-right: 10px;
+}
+
+.table-btn {
+    width: 135px;
+}

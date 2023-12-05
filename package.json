@@ -1,0 +1,32 @@
+{
+  "name": "foodorder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@electron-forge/cli": "^7.1.0",
+    "electron": "^27.1.2",
+    "electron-packager": "^17.1.2"
+  },
+  "config": {
+    "forge": {
+      "makers": [
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "win"
+          ],
+          "config": {
+          }
+        }
+      ]
+    }
+  }
+}

@@ -32,49 +32,33 @@
             <button onclick="startOrder()">Order</button>
         </div>
 
-        <!-- <div class="manager-section" id="manager-section" class="hidden">
-            <div class="tab-nav">
-                <button class="tab-button" onclick="showTab('table-section')">Table</button>
-                <button class="tab-button" onclick="showTab('menu-section')">Menu</button>
-            </div>
-
-            <div class="table-section" id="table-section">
-                <h2>Tables</h2>
-            </div>
-
-            <div class="menu-section" id="menu-section" class="hidden">
-                <h2>Menu</h2>
-                <div id="add-item">
-                    <input type="text" id="new-item-name" placeholder="New Item Name">
-                    <input type="number" id="new-item-price" placeholder="Price">
-                    <button onclick="addItem()">Add Item</button>
-                </div>
-                <div id="menu">
-                </div>
-            </div>
-        </div> -->
         <div class="manager-section" id="manager-section" class="hidden">
             <h2>Manager dashboard</h2>
             <div class="containerp" style="display: flex">
                 <div class="table">
-                    <h2>Table</h2>
-                    <div id="table">
-                        <button onclick="addTable()">Add Table</button>
+                    <div class="table-header">
+                        <h2>Table</h2>
+                        <button onclick="refreshTable()">Refresh</button>
                     </div>
+                    <div id="table">
+                    </div>
+                    <button style="width:111px; float: inline-end; margin-right: 10px;" onclick="addTable()">Add Table
+                    </button>
                 </div>
                 <div class="menu">
                     <h2>Menu</h2>
-                    <div id="add-item">
+                    <div id="add-item"
+                        style="display: flex; align-items: center; justify-content: space-between;margin-top: -10px">
                         <input type="text" id="new-item-name" placeholder="New Item Name">
-                        <input type="number" id="new-item-price" placeholder="Price">
-                        <button onclick="addItem()">Add Item</button>
+                        <input type="number" id="new-item-price" placeholder="Price" style="width: 75px;margin: 0 10px">
+                        <button onclick="addItem()" style="margin-left: 0px; padding: 10px">Add Item</button>
+                        <div id="error-message" style="color: red;"></div>
                     </div>
                 </div>
                 <div class="order">
                     <h2>Order</h2>
                     <div class="Order-items">
                     </div>
-
                 </div>
             </div>
         </div>
@@ -82,13 +66,13 @@
         <div class="containerp" style="display: none">
             <div class="menu">
                 <h2>Menu</h2>
-                <!-- 在此添加更多菜单项 -->
+
             </div>
 
             <div class="cart">
                 <h2>Cart</h2>
                 <div class="cart-items">
-                    <!-- 在此添加更多购物车项 -->
+
                 </div>
                 <div style="margin-top: 10px">
                     <button id="place-order-button">Place Order</button>
@@ -97,10 +81,12 @@
             </div>
         </div>
     </main>
+
+    <div id="myAlert"></div>
+    <script src="env.js"></script>
     <script src="cookies.js"></script>
     <script src="login.js"></script>
     <script src="menu.js"></script>
-    <script src="main.js"></script>
     <script src="manager.js"></script>
 </body>
 
